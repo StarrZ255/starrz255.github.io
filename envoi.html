@@ -530,6 +530,12 @@
       sg.addEventListener("change", function () { changerGroupe(g, sg.value, sg); });
       lg.appendChild(sg);
       li.appendChild(lg);
+      if (window.MARIAGE_INVITES) {
+        var bs = document.createElement("button");
+        bs.type = "button"; bs.className = "texte-lien"; bs.textContent = "Supprimer cet invité";
+        bs.addEventListener("click", function () { window.MARIAGE_INVITES.supprimer(g.id, g.nom_affiche || g.prenom); });
+        li.appendChild(bs);
+      }
 
       var actions = document.createElement("div");
       actions.className = "actions";
@@ -723,6 +729,9 @@
   });
 
   // ---------- démarrage ----------
+  // Création et suppression d'invités depuis la barre de navigation (nav.js)
+  window.MARIAGE_API = api;
+  window.addEventListener("invites-modifies", function () { charger(); });
   var s0 = lire();
   if (s0.refresh) {
     auth("refresh_token", { refresh_token: s0.refresh }).then(entrer).catch(function (e) { if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE(); });

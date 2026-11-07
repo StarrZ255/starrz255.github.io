@@ -9,11 +9,11 @@ window.MARIAGE = {
   devise: "Dieu est fidèle",
 
   // Adresse du site, utilisée dans les liens envoyés. Vide = adresse de la page ouverte.
-  siteUrl: "https://starrz255.github.io",
+  siteUrl: "https://invitations.kstarz.xyz",
 
   // Adresse de l'envoi du code QR par e-mail (Worker Cloudflare), ex. "https://mon-domaine.com/api/qr".
   // Vide = pas d'e-mail : le champ n'est pas affiché sur la page d'invitation.
-  mailUrl: "",
+  mailUrl: "https://invitations.kstarz.xyz/api/qr",
 
   // Vide = la ligne n'est pas affichée. À remplir quand la date limite est fixée.
   reponseAvant: ""

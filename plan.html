@@ -724,6 +724,9 @@
     }).then(function () { toast("Tables renumérotées de 1 à " + n + " en serpent"); });
   });
 
+  // Création et suppression d'invités depuis la barre de navigation (nav.js)
+  window.MARIAGE_API = api;
+  window.addEventListener("invites-modifies", function () { charger(); });
   var s0 = lire();
   if (s0.refresh) auth("refresh_token", { refresh_token: s0.refresh }).then(function () { vue("app"); return charger(); }).catch(function (e) { if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE(); });
   else vue("connexion");

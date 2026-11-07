@@ -196,6 +196,11 @@
     var pied = document.createElement("div"); pied.className = "pied";
     var ann = document.createElement("button"); ann.type = "button"; ann.textContent = "Annuler"; ann.addEventListener("click", function () { d.close(); });
     var ok = document.createElement("button"); ok.type = "submit"; ok.className = "principal"; ok.textContent = "Enregistrer";
+    if (window.MARIAGE_INVITES) {
+      var sup = document.createElement("button"); sup.type = "button"; sup.textContent = "Supprimer";
+      sup.addEventListener("click", function () { d.close(); window.MARIAGE_INVITES.supprimer(g.id, g.prenom); });
+      pied.appendChild(sup);
+    }
     pied.appendChild(ann); pied.appendChild(ok); f.appendChild(pied);
     f.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -325,6 +330,9 @@
       .then(function () { vue("app"); return charger(); })
       .catch(function () { err.textContent = "Connexion refusée."; err.hidden = false; });
   });
+  // Création et suppression d'invités depuis la barre de navigation (nav.js)
+  window.MARIAGE_API = api;
+  window.addEventListener("invites-modifies", function () { charger(); });
   var s0 = lire();
   if (s0.refresh) auth("refresh_token", { refresh_token: s0.refresh }).then(function () { vue("app"); return charger(); }).catch(function (e) { if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE(); });
   else vue("connexion");
