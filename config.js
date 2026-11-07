@@ -11,6 +11,10 @@ window.MARIAGE = {
   // Adresse du site, utilisée dans les liens envoyés. Vide = adresse de la page ouverte.
   siteUrl: "https://starrz255.github.io",
 
+  // Adresse de l'envoi du code QR par e-mail (Worker Cloudflare), ex. "https://mon-domaine.com/api/qr".
+  // Vide = pas d'e-mail : le champ n'est pas affiché sur la page d'invitation.
+  mailUrl: "",
+
   // Vide = la ligne n'est pas affichée. À remplir quand la date limite est fixée.
   reponseAvant: ""
 };
