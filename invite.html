@@ -114,6 +114,9 @@
     .lignes b { color: var(--accent); font-weight: 700; font-size: 21px; text-align: right; }
     .lignes .lieu { color: var(--muted); font-size: 18px; line-height: 1.3; }
     .lignes .lieu strong { display: block; color: var(--text); font-size: 20px; }
+    .itineraires { margin: 26px 0 8px; text-align: left; }
+    .itineraires h3 { margin: 0 0 8px; }
+    .itineraires .evt { margin: 14px 0 0; color: var(--muted); font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
     .lignes a { color: var(--accent); text-underline-offset: 3px; font-size: 17px; }
 
     .choix { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 6px; }
@@ -250,6 +253,10 @@
       <div id="qr" role="img" aria-label="Votre code d'entrée personnel"></div>
       <p class="muted ref" id="ref-box" hidden>Si le code ne se lit pas, donnez votre référence : <strong id="ref"></strong></p>
     </div>
+    <div class="itineraires" id="itineraires" hidden>
+      <h3>Pour nous rejoindre</h3>
+      <div id="itin-liste"></div>
+    </div>
     <button type="button" class="lien" id="modifier">Modifier ma réponse</button>
   </section>
 
@@ -316,12 +323,6 @@
         var lieu = el("div", "lieu");
         lieu.appendChild(el("strong", null, l.libelle));
         lieu.appendChild(document.createTextNode(l.lieu));
-        if (l.maps) {
-          var a = el("a", null, "Voir l'itinéraire");
-          a.href = l.maps; a.target = "_blank"; a.rel = "noopener";
-          lieu.appendChild(document.createElement("br"));
-          lieu.appendChild(a);
-        }
         li.appendChild(lieu);
         ul.appendChild(li);
       });
@@ -384,6 +385,33 @@
     if (inv.table_nom) $("table-nom").textContent = inv.table_nom;
     // Code d'entrée : seulement pour qui vient à une des cérémonies ou à la réception (pas la dot seule)
     var vientJourJ = inv.programme.some(function (ev) { return ev.id !== "dot" && inv.reponses[ev.id] && inv.reponses[ev.id].r === "oui"; });
+    // Itinéraires : uniquement les lieux des journées où la personne vient
+    var zone = $("itin-liste"), nbLiens = 0;
+    zone.innerHTML = "";
+    inv.programme.forEach(function (ev) {
+      var r = inv.reponses[ev.id];
+      if (!r || r.r !== "oui") return;
+      var avecLien = ev.lignes.filter(function (l) { return l.maps; });
+      if (!avecLien.length) return;
+      zone.appendChild(el("p", "evt", ev.titre + " · " + ev.jour));
+      var ul = el("ul", "lignes");
+      avecLien.forEach(function (l) {
+        var li = el("li");
+        li.appendChild(el("b", null, l.heure));
+        var lieu = el("div", "lieu");
+        lieu.appendChild(el("strong", null, l.libelle));
+        lieu.appendChild(document.createTextNode(l.lieu));
+        var a = el("a", null, "Voir l'itinéraire");
+        a.href = l.maps; a.target = "_blank"; a.rel = "noopener";
+        lieu.appendChild(document.createElement("br"));
+        lieu.appendChild(a);
+        li.appendChild(lieu);
+        ul.appendChild(li);
+        nbLiens++;
+      });
+      zone.appendChild(ul);
+    });
+    $("itineraires").hidden = !nbLiens;
     $("qr-box").hidden = true;
     $("ref-box").hidden = !inv.reference;
     if (inv.reference) $("ref").textContent = inv.reference;
