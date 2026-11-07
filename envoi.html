@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1a30">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Envoi des invitations</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* Page de travail : mêmes couleurs que l'invitation, texte en sans-serif pour la lecture rapide */
+    :root {
+      color-scheme: dark;
+      --bg: #0a1a30;
+      --card: #0f2742;
+      --text: #f4efe6;
+      --muted: #a9bdd8;
+      --ciel: #cfe2f7;
+      --bebe: #b4d0ee;
+      --bleuet: #5482de;
+      --or: #c9a227;
+      --line: rgba(180, 208, 238, .22);
+      --ok: #8fd6a4;
+      --error: #ff9b9b;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(120% 40% at 50% -6%, rgba(20, 76, 205, .32), transparent 62%), var(--bg);
+      background-attachment: fixed;
+      color: var(--text);
+      font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+    main { width: 100%; max-width: 560px; padding: 0 16px 90px; }
+    h1 { font: 600 25px/1.15 "Cormorant Garamond", Georgia, serif; margin: 0; color: var(--or); }
+    [hidden] { display: none !important; }
+
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 0 14px; }
+    .texte-lien { background: none; border: 0; color: var(--bebe); font: inherit; font-size: 14px; padding: 10px 4px; min-height: 44px; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+    /* Connexion */
+    #connexion { margin-top: 28px; padding: 24px 20px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+    #connexion h2 { font: 600 24px/1.2 "Cormorant Garamond", Georgia, serif; margin: 0 0 6px; }
+    .aide { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+    label.champ { display: block; font-size: 14px; color: var(--muted); margin: 0 0 14px; }
+    input[type=email], input[type=password], input[type=search] {
+      display: block; width: 100%; margin-top: 6px; min-height: 48px;
+      font: inherit; color: var(--text); background: var(--bg);
+      border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+    }
+    input:focus-visible, button:focus-visible, a.btn:focus-visible { outline: 2px solid var(--ciel); outline-offset: 2px; }
+    .erreur { color: var(--error); font-size: 14px; margin: 12px 0 0; }
+
+    .btn, button.principal {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 46px; padding: 8px 16px; border: 0; border-radius: 8px;
+      font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; text-align: center;
+      background: var(--ciel); color: var(--bg);
+      transition: background-color .2s var(--ease), transform .15s var(--ease);
+    }
+    button.principal { width: 100%; }
+    .btn:hover, button.principal:hover { background: #e3effb; }
+    .btn:active, button.principal:active { transform: scale(.98); }
+    .btn.fait { background: transparent; color: var(--bebe); border: 1px solid var(--line); font-weight: 500; }
+    .btn.fait:hover { border-color: var(--bebe); background: transparent; }
+    button:disabled { opacity: .6; cursor: default; }
+
+    /* Application */
+    .cotes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .cotes button {
+      min-height: 48px; font: inherit; font-weight: 600; color: var(--bebe);
+      background: transparent; border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+      transition: background-color .2s var(--ease), border-color .2s var(--ease);
+    }
+    .cotes button[aria-pressed=true] { color: var(--text); border-color: var(--ciel); background: rgba(207, 226, 247, .13); }
+
+    .bilan { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 8px; }
+    .bilan strong { font-size: 22px; }
+    .bilan span { color: var(--muted); font-size: 14px; }
+    .barre { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+    .barre i { display: block; height: 100%; width: 100%; background: var(--bleuet); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease); }
+    .avertissement { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--or); border-radius: 8px; color: var(--ciel); font-size: 14px; }
+
+    .lot-info { margin: 10px 0 0; padding: 10px 12px; border: 1px solid var(--bleuet); border-radius: 8px; background: rgba(207, 226, 247, .08); font-size: 14px; }
+    .lot-info strong { color: var(--ciel); }
+    .serie-info { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 14px 0 0; font-size: 15px; }
+    .serie-info strong { color: var(--ciel); }
+    .lot-info .btn { margin-top: 10px; }
+    .outils { display: flex; gap: 8px; margin: 16px 0 6px; }
+    .outils input { margin-top: 0; flex: 1; }
+    .filtres { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+    .filtres button {
+      min-height: 40px; padding: 4px 14px; font: inherit; font-size: 14px; color: var(--bebe);
+      background: transparent; border: 1px solid var(--line); border-radius: 20px; cursor: pointer;
+    }
+    .filtres button[aria-pressed=true] { color: var(--text); border-color: var(--ciel); background: rgba(207, 226, 247, .13); }
+
+    #liste { list-style: none; margin: 8px 0 0; padding: 0; }
+    #liste li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .nom { font-weight: 600; overflow-wrap: anywhere; }
+    .sous { color: var(--muted); font-size: 14px; margin-top: 2px; }
+    .dotchoix { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 6px; font-size: 14px; color: var(--muted); }
+    .dotchoix label { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
+    .dotchoix input { width: 20px; height: 20px; accent-color: var(--ciel); }
+    .sous .oui { color: var(--ok); }
+    .sous .non { color: var(--error); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .actions .btn { flex: 1 1 140px; }
+    form.tel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    form.tel input { flex: 1 1 200px; margin: 0; }
+    form.tel .btn { flex: 0 1 auto; }
+    form.tel .erreur { flex-basis: 100%; margin: 0; }
+    input[type=tel] { display: block; min-height: 46px; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+    .groupe-choix { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; color: var(--muted); }
+    .groupe-choix select { flex: 1; min-height: 40px; font: inherit; font-size: 14px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; }
+    .appel { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; margin-top: 6px; font-size: 14px; color: var(--muted); cursor: pointer; }
+    .appel input { width: 20px; height: 20px; accent-color: var(--ok); }
+    .appel.fait { color: var(--ok); }
+    .joindre { flex-basis: 100%; color: var(--muted); font-size: 13px; margin: 0; }
+    .vide { color: var(--muted); text-align: center; padding: 32px 0; }
+
+    #toast {
+      position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+      width: calc(100% - 32px); max-width: 528px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 12px 10px 16px; background: var(--card); border: 1px solid var(--or); border-radius: 10px;
+      box-shadow: 0 16px 36px -14px rgba(0, 0, 0, .7);
+    }
+    #toast button { background: none; border: 0; color: var(--ciel); font: inherit; font-weight: 600; min-height: 44px; padding: 0 8px; cursor: pointer; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      #toast { animation: monte .35s var(--ease) both; }
+      @keyframes monte { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <h1>Envoi des invitations</h1>
+    <button type="button" class="texte-lien" id="deconnexion" hidden>Se déconnecter</button>
+  </div>
+
+  <noscript><p class="aide">Activez JavaScript pour utiliser cette page.</p></noscript>
+
+  <section id="connexion" hidden>
+    <h2>Connexion</h2>
+    <p class="aide">Réservé aux mariés. Utilisez le compte créé pour vous dans Supabase.</p>
+    <form id="form-connexion">
+      <label class="champ">Adresse e-mail
+        <input type="email" id="email" autocomplete="username" required>
+      </label>
+      <label class="champ">Mot de passe
+        <input type="password" id="mdp" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="principal" id="btn-connexion">Se connecter</button>
+      <p class="erreur" id="err-connexion" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <div class="cotes" role="group" aria-label="Côté">
+      <button type="button" data-cote="marie" aria-pressed="false">Le marié</button>
+      <button type="button" data-cote="mariee" aria-pressed="false">La mariée</button>
+    </div>
+
+    <div class="bilan"><strong id="bilan-n"></strong><span id="bilan-jour"></span></div>
+    <div class="barre" aria-hidden="true"><i id="barre"></i></div>
+    <p class="avertissement" id="avertissement" hidden>Plus de 30 envois aujourd'hui. Faites une pause et reprenez demain pour limiter le risque de signalement par WhatsApp.</p>
+
+    <div class="outils">
+      <input type="search" id="recherche" placeholder="Rechercher un nom" aria-label="Rechercher un nom" autocomplete="off">
+      <button type="button" class="texte-lien" id="actualiser">Actualiser</button>
+    </div>
+    <div class="filtres" role="group" aria-label="Fichier à joindre">
+      <button type="button" data-lot="tous" aria-pressed="true">Tous les fichiers</button>
+      <button type="button" data-lot="v1" aria-pressed="false">Vidéo individuelle</button>
+      <button type="button" data-lot="v2" aria-pressed="false">Vidéo couple</button>
+      <button type="button" data-lot="dot" aria-pressed="false">Carte dot seule</button>
+      <button type="button" data-lot="dot_v1" aria-pressed="false">Carte dot + vidéo individuelle</button>
+      <button type="button" data-lot="dot_v2" aria-pressed="false">Carte dot + vidéo couple</button>
+    </div>
+    <div class="filtres" role="group" aria-label="Numéro qui envoie" id="exp-filtres"></div>
+    <p class="lot-info" id="lot-info" hidden></p>
+    <div class="filtres" role="group" aria-label="Filtre">
+      <button type="button" data-filtre="a_envoyer" aria-pressed="true">À envoyer</button>
+      <button type="button" data-filtre="tous" aria-pressed="false">Tous</button>
+    </div>
+    <div class="filtres" role="group" aria-label="Appel">
+      <button type="button" data-appel="tous" aria-pressed="true">Appelés ou non</button>
+      <button type="button" data-appel="non" aria-pressed="false">À appeler</button>
+      <button type="button" data-appel="oui" aria-pressed="false">Déjà appelés</button>
+    </div>
+
+    <div class="serie-info" id="serie-info" hidden><strong id="serie-n"></strong><button type="button" class="texte-lien" id="serie-passer">Passer cet invité</button></div>
+    <ul id="liste"></ul>
+    <p class="vide" id="vide" hidden></p>
+    <p class="erreur" id="err-app" role="alert" hidden></p>
+  </section>
+</main>
+
+<div id="toast" role="status" hidden><span id="toast-texte"></span><button type="button" id="toast-annuler">Annuler</button></div>
+
+<script src="/config.js"></script>
+<script src="/nav.js"></script>
+<script>
+(function () {
+  var C = window.MARIAGE;
+  var $ = function (id) { return document.getElementById(id); };
+  var CLE = "mariage-envoi";
+
+  // Ce que chaque groupe reçoit
+  // Un seul message par invité : celui du groupe (dot seule, jour J seul, ou les deux journées)
+  var TYPES = { dot: ["dot"], jour_j: ["jour_j"], tous: ["tous"] };
+  var NOM_TYPE = { dot: "la dot", jour_j: "le jour J", tous: "les deux journées" };
+
+  var session = null;     // { access, refresh }
+  var guests = [];
+  var TYPES_MODELES = ["dot", "jour_j", "tous", "dot_ceremonie", "dot_repas", "tous_ceremonie", "tous_repas"];
+  var modeles = {};
+  TYPES_MODELES.forEach(function (k) { modeles[k] = []; });
+  var cote = "marie";
+  var lot = "tous";
+  var exp = "tous";       // numéro qui envoie : "tous", "aucun" ou un numéro
+  var serie = false;      // mode suivant : un seul invité à la fois
+  var passes = [];        // invités passés, repoussés à la fin
+  var filtre = "a_envoyer";
+  var appel = "tous";
+  var pending = null;     // { id, type, t } : envoi lancé, en attente du retour sur la page
+  var toastTimer = null;
+
+  // ---------- stockage (facultatif, jamais bloquant) ----------
+  function lire() { try { return JSON.parse(localStorage.getItem(CLE) || "{}"); } catch (e) { return {}; } }
+  function ecrire(o) { try { localStorage.setItem(CLE, JSON.stringify(o)); } catch (e) {} }
+
+  // ---------- API ----------
+  function brut(path, opts, jeton) {
+    opts = opts || {};
+    var h = { "apikey": C.supabaseKey, "Content-Type": "application/json" };
+    if (jeton) h["Authorization"] = "Bearer " + jeton;
+    if (opts.prefer) h["Prefer"] = opts.prefer;
+    return fetch(C.supabaseUrl + path, { method: opts.method || "GET", headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  }
+
+  function auth(grant, corps) {
+    return brut("/auth/v1/token?grant_type=" + grant, { method: "POST", body: corps }).then(function (r) {
+      if (!r.ok) throw new Error("auth " + r.status);
+      return r.json();
+    }).then(function (j) {
+      session = { access: j.access_token, refresh: j.refresh_token };
+      var s = lire(); s.refresh = j.refresh_token; ecrire(s);
+    });
+  }
+
+  function api(path, opts) {
+    return brut(path, opts, session && session.access).then(function (r) {
+      if (r.status !== 401) return r;
+      // Jeton expiré : une tentative de renouvellement, puis on rejoue
+      if (!session || !session.refresh) throw new Error("session");
+      return auth("refresh_token", { refresh_token: session.refresh }).then(function () {
+        return brut(path, opts, session.access);
+      });
+    }).then(function (r) {
+      if (!r.ok) throw new Error("http " + r.status);
+      return r.status === 204 || (opts && opts.prefer === "return=minimal") ? null : r.json();
+    });
+  }
+
+  // ---------- utilitaires ----------
+  function norm(s) { return (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function memeJour(iso) { return iso && new Date(iso).toDateString() === new Date().toDateString(); }
+  function baseUrl() { return (C.siteUrl || location.origin).replace(/\/$/, ""); }
+  function types(g) { return TYPES[g.segment] || TYPES.jour_j; }
+  function envoye(g, t) { return !!(g.envois && g.envois[t]); }
+  function aEnvoyer(g) { return types(g).some(function (t) { return !envoye(g, t); }); }
+
+  // Un lot = un même ensemble de fichiers à joindre : on envoie tout le lot d'affilée
+  var LOTS = {
+    v1: { nom: "Vidéo individuelle", fichier: "la vidéo individuelle (1 place)" },
+    v2: { nom: "Vidéo couple", fichier: "la vidéo couple (2 places ou plus)" },
+    dot: { nom: "Carte dot seule", fichier: "la carte de la dot" },
+    dot_v1: { nom: "Carte dot + vidéo individuelle", fichier: "la carte de la dot ET la vidéo individuelle" },
+    dot_v2: { nom: "Carte dot + vidéo couple", fichier: "la carte de la dot ET la vidéo couple" }
+  };
+  function lotDe(g) {
+    var v = g.places >= 2 ? "v2" : "v1";
+    if (g.segment === "dot") return "dot";
+    return g.segment === "tous" ? "dot_" + v : v;
+  }
+
+  function fmt(n) { return n ? n.replace(/^\+225(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/, "$1 $2 $3 $4 $5") : ""; }
+  function expOk(g) {
+    if (exp === "tous") return true;
+    var e = g.expediteur || "";
+    return exp === "aucun" ? !e : e === exp;
+  }
+
+  function placesPhrase(g) {
+    if (g.places <= 1) return "";
+    return "\n\nCette invitation est valable pour " + g.places + " personnes.";
+  }
+
+  // Message prêt à coller en légende de l'image ou de la vidéo
+  // Dot : invité à la cérémonie seule ou au repas seul, le message est adapté
+  function typeMessage(g, t) {
+    if (t !== "dot" && t !== "tous") return t;
+    if (g.dot_ceremonie !== false && g.dot_repas === false) return t + "_ceremonie";
+    if (g.dot_ceremonie === false && g.dot_repas !== false) return t + "_repas";
+    return t;
+  }
+  function message(g, t) {
+    var liste = modeles[typeMessage(g, t)] || [];
+    if (!liste.length) return "";
+    var i = guests.indexOf(g);
+    return liste[(i < 0 ? 0 : i) % liste.length].texte
+      .split("{nom}").join(g.nom_affiche || g.prenom)
+      .split("{lien}").join(baseUrl() + "/i/" + g.token)
+      .split("{places_phrase}").join(placesPhrase(g));
+  }
+
+  // Quel fichier joindre à la main dans WhatsApp
+  function aJoindre(g, t) {
+    var video = g.places >= 2 ? "vidéo couple (2 places)" : "vidéo individuelle (1 place)";
+    if (t === "dot") return "carte de la dot";
+    if (t === "tous") return "carte de la dot et " + video;
+    return video;
+  }
+
+  // Ouvre la conversation avec le message déjà écrit. Sans numéro, WhatsApp propose de choisir le contact.
+  function lienWhatsApp(g, t) {
+    var num = g.telephone ? g.telephone.replace(/\D/g, "") : "";
+    return "https://wa.me/" + num + "?text=" + encodeURIComponent(message(g, t));
+  }
+
+  // Numéro saisi à la main : 10 chiffres ivoiriens ou format international. Retourne null si invalide.
+  function normaliserTel(brut) {
+    var s = (brut || "").replace(/[\s.\-()]/g, "");
+    if (s.indexOf("00") === 0) s = "+" + s.slice(2);
+    if (/^\+\d{8,15}$/.test(s)) return s;
+    if (/^\d{10}$/.test(s)) return "+225" + s;
+    return null;
+  }
+
+  function copier(texte) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(texte).catch(function () {}); return; } } catch (e) {}
+    var ta = document.createElement("textarea");
+    ta.value = texte; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function resumeReponses(g) {
+    var ev = { dot: "Dot", mairie: "Mairie", eglise: "Église", reception: "Réception" };
+    return Object.keys(g.reponses || {}).map(function (k) {
+      var r = g.reponses[k];
+      return { cls: r.r, txt: (ev[k] || k) + " : " + (r.r === "oui" ? (r.n > 1 ? "présent (" + r.n + ")" : "présent") : "absent") };
+    });
+  }
+
+  // ---------- affichage ----------
+  function vue(nom) {
+    $("connexion").hidden = nom !== "connexion";
+    $("app").hidden = nom !== "app";
+    $("deconnexion").hidden = nom !== "app";
+  }
+
+  function toast(texte, annuler) {
+    clearTimeout(toastTimer);
+    $("toast-texte").textContent = texte;
+    $("toast").hidden = false;
+    $("toast-annuler").onclick = function () { $("toast").hidden = true; annuler(); };
+    toastTimer = setTimeout(function () { $("toast").hidden = true; }, 9000);
+  }
+
+  function dansLot(g) { return lot === "tous" || lotDe(g) === lot; }
+
+  function render() {
+    var duCote = guests.filter(function (g) { return g.cote === cote; });
+    var vals = [];
+    duCote.forEach(function (g) { if (g.expediteur && vals.indexOf(g.expediteur) < 0) vals.push(g.expediteur); });
+    vals.sort();
+    if (exp !== "tous" && exp !== "aucun" && vals.indexOf(exp) < 0) exp = "tous";
+    var nbSans = duCote.filter(function (g) { return !g.expediteur && aEnvoyer(g); }).length;
+    if (exp === "aucun" && !nbSans) exp = "tous";
+    var bx = $("exp-filtres"); bx.innerHTML = "";
+    var choix = [["tous", "Tous les numéros"]].concat(vals.map(function (v) {
+      return [v, "Depuis le " + fmt(v) + " (" + duCote.filter(function (g) { return g.expediteur === v && aEnvoyer(g); }).length + ")"];
+    }));
+    if (nbSans) choix.push(["aucun", "Sans numéro d'envoi (" + nbSans + ")"]);
+    bx.hidden = vals.length === 0;
+    choix.forEach(function (c) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = c[1];
+      b.setAttribute("aria-pressed", c[0] === exp);
+      b.addEventListener("click", function () { exp = c[0]; serie = false; passes = []; render(); });
+      bx.appendChild(b);
+    });
+    var duExp = duCote.filter(expOk);
+    var restants = duCote.filter(aEnvoyer).length;
+    var auj = 0;
+    guests.forEach(function (g) { types(g).forEach(function (t) { if (memeJour(g.envois && g.envois[t])) auj++; }); });
+
+    $("bilan-n").textContent = (duCote.length - restants) + " sur " + duCote.length + " complets";
+    var nbAppeles = duCote.filter(function (g) { return !!g.appele_le; }).length;
+    $("bilan-jour").textContent = "Appelés : " + nbAppeles + " sur " + duCote.length + " · Envois aujourd'hui : " + auj;
+    $("barre").style.transform = "scaleX(" + (duCote.length ? (duCote.length - restants) / duCote.length : 0) + ")";
+    $("avertissement").hidden = auj <= 30;
+
+    document.querySelectorAll(".cotes button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.cote === cote); });
+    document.querySelectorAll("[data-lot]").forEach(function (b) {
+      var k = b.dataset.lot;
+      b.setAttribute("aria-pressed", k === lot);
+      if (k !== "tous") b.textContent = LOTS[k].nom + " (" + duExp.filter(function (g) { return lotDe(g) === k && aEnvoyer(g); }).length + ")";
+    });
+    var info = $("lot-info");
+    if (lot === "tous") info.hidden = true;
+    else {
+      var n = duExp.filter(function (g) { return lotDe(g) === lot && aEnvoyer(g); }).length;
+      info.hidden = false;
+      info.innerHTML = "";
+      info.appendChild(document.createTextNode("Joindre à chaque message : "));
+      var st = document.createElement("strong"); st.textContent = LOTS[lot].fichier; info.appendChild(st);
+      info.appendChild(document.createTextNode(n ? ". " + n + " à envoyer dans ce lot." : ". Ce lot est terminé."));
+      if (!n) serie = false;
+      if (n) {
+        info.appendChild(document.createElement("br"));
+        var bs = document.createElement("button");
+        bs.type = "button"; bs.className = "btn" + (serie ? "" : " fait");
+        bs.textContent = serie ? "Quitter le mode suivant" : "Mode suivant : un invité à la fois";
+        bs.addEventListener("click", function () { serie = !serie; passes = []; render(); });
+        info.appendChild(bs);
+      }
+    }
+    if (lot === "tous") serie = false;
+    document.querySelectorAll("[data-filtre]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.filtre === filtre); });
+    document.querySelectorAll("[data-appel]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.appel === appel); });
+
+    var q = norm($("recherche").value.trim());
+    var lignes = duCote.filter(function (g) {
+      if (!dansLot(g) || !expOk(g)) return false;
+      if (filtre === "a_envoyer" && !aEnvoyer(g)) return false;
+      if (appel === "non" && g.appele_le) return false;
+      if (appel === "oui" && !g.appele_le) return false;
+      return !q || norm(g.prenom + " " + (g.nom_affiche || "")).indexOf(q) !== -1;
+    });
+
+    var si = $("serie-info");
+    si.hidden = !serie;
+    if (serie) {
+      var rest = lignes.filter(aEnvoyer);
+      rest.sort(function (a, b) { return (passes.indexOf(a.id) >= 0) - (passes.indexOf(b.id) >= 0); });
+      var totalLot = duExp.filter(function (g) { return lotDe(g) === lot; }).length;
+      var restLot = duExp.filter(function (g) { return lotDe(g) === lot && aEnvoyer(g); }).length;
+      $("serie-n").textContent = rest.length ? "Invité " + (totalLot - restLot + 1) + " sur " + totalLot : "";
+      $("serie-passer").hidden = rest.length < 2;
+      lignes = rest.slice(0, 1);
+    }
+
+    var ul = $("liste");
+    ul.innerHTML = "";
+    lignes.forEach(function (g) {
+      var li = document.createElement("li");
+      li.dataset.id = g.id;
+      var nom = document.createElement("div");
+      nom.className = "nom";
+      nom.textContent = g.nom_affiche ? g.nom_affiche + " (" + g.prenom + ")" : g.prenom;
+      li.appendChild(nom);
+
+      var sous = document.createElement("div");
+      sous.className = "sous";
+      var bouts = [];
+      if (g.places > 1) bouts.push(g.places + " personnes");
+      if (g.expediteur) bouts.push("à envoyer depuis le " + fmt(g.expediteur));
+      if (!g.telephone) bouts.push("choisir le contact dans WhatsApp");
+      sous.appendChild(document.createTextNode(bouts.join(" · ")));
+      resumeReponses(g).forEach(function (r, k) {
+        var s = document.createElement("span");
+        s.className = r.cls;
+        s.textContent = (bouts.length || k ? " · " : "") + r.txt;
+        sous.appendChild(s);
+      });
+      if (sous.textContent) li.appendChild(sous);
+
+      var lab0 = document.createElement("label");
+      lab0.className = "appel" + (g.appele_le ? " fait" : "");
+      var cb0 = document.createElement("input");
+      cb0.type = "checkbox"; cb0.checked = !!g.appele_le;
+      cb0.addEventListener("change", function () { marquerAppel(g, cb0.checked); });
+      lab0.appendChild(cb0);
+      lab0.appendChild(document.createTextNode(g.appele_le ? " Appelé le " + new Date(g.appele_le).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : " Pas encore appelé"));
+      li.appendChild(lab0);
+
+      if (g.segment !== "jour_j") {          // dot : cérémonie du matin et/ou repas
+        var dc = document.createElement("div");
+        dc.className = "dotchoix";
+        [["dot_ceremonie", "Cérémonie du matin"], ["dot_repas", "Repas"]].forEach(function (c) {
+          var lab = document.createElement("label");
+          var cb = document.createElement("input");
+          cb.type = "checkbox"; cb.checked = g[c[0]] !== false;
+          cb.addEventListener("change", function () {
+            var autre = c[0] === "dot_ceremonie" ? "dot_repas" : "dot_ceremonie";
+            if (!cb.checked && g[autre] === false) { cb.checked = true; toast("Cochez au moins la cérémonie ou le repas"); return; }
+            var avant = g[c[0]], corps = {}; corps[c[0]] = cb.checked; g[c[0]] = cb.checked;
+            api("/rest/v1/guests?id=eq." + g.id, { method: "PATCH", prefer: "return=minimal", body: corps })
+              .then(function () { render(); })
+              .catch(function () { g[c[0]] = avant; render(); $("err-app").textContent = "Le choix n'a pas pu être enregistré."; $("err-app").hidden = false; });
+          });
+          lab.appendChild(cb); lab.appendChild(document.createTextNode(" " + c[1]));
+          dc.appendChild(lab);
+        });
+        li.appendChild(dc);
+      }
+
+      var lg = document.createElement("label");
+      lg.className = "groupe-choix";
+      lg.appendChild(document.createTextNode("Invité à "));
+      var sg = document.createElement("select");
+      [["jour_j", "Le mariage seulement"], ["tous", "La dot et le mariage"], ["dot", "La dot seulement"]].forEach(function (o) {
+        var op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; if (o[0] === g.segment) op.selected = true; sg.appendChild(op);
+      });
+      sg.addEventListener("change", function () { changerGroupe(g, sg.value, sg); });
+      lg.appendChild(sg);
+      li.appendChild(lg);
+
+      var actions = document.createElement("div");
+      actions.className = "actions";
+      types(g).forEach(function (t) {
+        var fait = envoye(g, t);
+        var a = document.createElement("a");
+        a.className = "btn" + (fait ? " fait" : "");
+        a.textContent = (fait ? "Renvoyer " : "Envoyer ") + NOM_TYPE[t];
+        a.href = lienWhatsApp(g, t);
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.addEventListener("click", function () {
+          copier(message(g, t));
+          pending = { id: g.id, type: t, t: Date.now() };
+        });
+        actions.appendChild(a);
+      });
+      var consigne = document.createElement("p");
+      consigne.className = "joindre";
+      consigne.textContent = "WhatsApp s'ouvre avec le message prêt. Joignez : " +
+        types(g).map(function (t) { return aJoindre(g, t); }).join(" et ") +
+        ". Si la légende de la pièce jointe est vide, collez le message (déjà copié).";
+      if (lot === "tous") actions.appendChild(consigne);
+      if (!g.telephone) {
+        var f = document.createElement("form");
+        f.className = "tel";
+        var inp = document.createElement("input");
+        inp.type = "tel"; inp.inputMode = "tel"; inp.placeholder = "Numéro WhatsApp, ex. 07 00 00 00 00";
+        inp.setAttribute("aria-label", "Numéro WhatsApp de " + g.prenom); inp.autocomplete = "off";
+        var ok = document.createElement("button");
+        ok.type = "submit"; ok.className = "btn fait"; ok.textContent = "Enregistrer le numéro";
+        var err = document.createElement("p");
+        err.className = "erreur"; err.hidden = true;
+        f.appendChild(inp); f.appendChild(ok); f.appendChild(err);
+        f.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var n = normaliserTel(inp.value);
+          if (!n) { err.textContent = "Numéro non reconnu : 10 chiffres, ou +indicatif et numéro."; err.hidden = false; return; }
+          err.hidden = true; ok.disabled = true;
+          api("/rest/v1/guests?id=eq." + g.id, { method: "PATCH", prefer: "return=minimal", body: { telephone: n } })
+            .then(function () { g.telephone = n; render(); })
+            .catch(function () { ok.disabled = false; err.textContent = "Le numéro n'a pas pu être enregistré."; err.hidden = false; });
+        });
+        f.style.flexBasis = "100%";
+        actions.appendChild(f);
+      }
+      li.appendChild(actions);
+      ul.appendChild(li);
+    });
+
+    var vide = $("vide");
+    vide.hidden = lignes.length > 0;
+    vide.textContent = q ? "Aucun nom ne correspond." : (filtre === "a_envoyer" ? "Tout est envoyé ici." : "Aucun invité.");
+  }
+
+  // ---------- actions ----------
+  function marquer(id, t, fait) {
+    var g = guests.filter(function (x) { return x.id === id; })[0];
+    if (!g) return;
+    var avant = JSON.parse(JSON.stringify(g.envois || {}));
+    var apres = JSON.parse(JSON.stringify(avant));
+    if (fait) apres[t] = new Date().toISOString(); else delete apres[t];
+    g.envois = apres;
+    render();
+    $("err-app").hidden = true;
+    api("/rest/v1/guests?id=eq." + id, { method: "PATCH", prefer: "return=minimal", body: { envois: apres } })
+      .catch(function () {
+        g.envois = avant;
+        render();
+        $("err-app").textContent = "Le statut n'a pas pu être enregistré. Vérifiez votre connexion.";
+        $("err-app").hidden = false;
+      });
+    if (fait) toast(g.prenom + " (" + NOM_TYPE[t] + ") : marqué comme envoyé", function () { marquer(id, t, false); });
+  }
+
+  // Change ce à quoi l'invité est convié (dot seule, mariage seul, les deux)
+  function changerGroupe(g, seg, sel) {
+    if (seg === g.segment) return;
+    var deja = (g.envois && Object.keys(g.envois).length) || (g.reponses && Object.keys(g.reponses).length);
+    if (deja && !confirm(g.prenom + " a déjà reçu son invitation ou répondu. Changer ce à quoi la personne est invitée modifie ce qu'elle voit sur son lien. Continuer ?")) { sel.value = g.segment; return; }
+    if (seg !== "jour_j" && g.dot_ceremonie === false && g.dot_repas === false) { sel.value = g.segment; toast("Cochez d'abord la cérémonie ou le repas"); return; }
+    var corps = { segment: seg };
+    if (seg === "dot") { corps.reference = null; corps.table_id = null; }
+    else if (!g.reference) {
+      var max = guests.reduce(function (m, x) { var r = x.reference && /^RMC-(\d+)$/.exec(x.reference); return r ? Math.max(m, +r[1]) : m; }, 0);
+      corps.reference = "RMC-" + ("00" + (max + 1)).slice(-3);
+    }
+    var avant = { segment: g.segment, reference: g.reference, table_id: g.table_id };
+    g.segment = seg; if ("reference" in corps) g.reference = corps.reference; if ("table_id" in corps) g.table_id = corps.table_id;
+    render();
+    api("/rest/v1/guests?id=eq." + g.id, { method: "PATCH", prefer: "return=minimal", body: corps })
+      .catch(function () {
+        g.segment = avant.segment; g.reference = avant.reference; g.table_id = avant.table_id; render();
+        $("err-app").textContent = "Le changement n'a pas pu être enregistré. Vérifiez votre connexion."; $("err-app").hidden = false;
+      });
+  }
+
+  function marquerAppel(g, fait) {
+    var avant = g.appele_le;
+    g.appele_le = fait ? new Date().toISOString() : null;
+    render();
+    $("err-app").hidden = true;
+    api("/rest/v1/guests?id=eq." + g.id, { method: "PATCH", prefer: "return=minimal", body: { appele_le: g.appele_le } })
+      .catch(function () {
+        g.appele_le = avant; render();
+        $("err-app").textContent = "Le suivi d'appel n'a pas pu être enregistré. Vérifiez votre connexion.";
+        $("err-app").hidden = false;
+      });
+  }
+
+  function charger() {
+    $("err-app").hidden = true;
+    return Promise.all([
+      api("/rest/v1/guests?select=id,prenom,nom_affiche,cote,places,telephone,expediteur,token,segment,envois,reponses,dot_ceremonie,dot_repas,appele_le,reference,table_id&parent_id=is.null&order=prenom.asc&limit=1000"),
+      api("/rest/v1/modeles_messages?select=type,variante,texte&order=type.asc,variante.asc")
+    ]).then(function (res) {
+      guests = res[0];
+      modeles = {};
+      TYPES_MODELES.forEach(function (k) { modeles[k] = []; });
+      res[1].forEach(function (m) { if (modeles[m.type]) modeles[m.type].push(m); });
+      render();
+    }).catch(function (e) {
+      if (e.message === "session" || /auth|http 40[13]/.test(e.message)) { sortir(); return; }
+      $("err-app").textContent = "Chargement impossible. Vérifiez votre connexion puis touchez Actualiser.";
+      $("err-app").hidden = false;
+    });
+  }
+
+  function entrer() {
+    var s = lire();
+    if (s.cote) cote = s.cote;
+    vue("app");
+    return charger();
+  }
+
+  function sortir() {
+    session = null;
+    var s = lire(); delete s.refresh; ecrire(s);
+    guests = [];
+    vue("connexion");
+  }
+
+  // ---------- événements ----------
+  $("form-connexion").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var btn = $("btn-connexion"), err = $("err-connexion");
+    err.hidden = true;
+    btn.disabled = true;
+    btn.textContent = "Connexion…";
+    auth("password", { email: $("email").value.trim(), password: $("mdp").value })
+      .then(entrer)
+      .then(function () { $("mdp").value = ""; })
+      .catch(function () {
+        err.textContent = "Connexion refusée. Vérifiez l'adresse et le mot de passe.";
+        err.hidden = false;
+      })
+      .then(function () { btn.disabled = false; btn.textContent = "Se connecter"; });
+  });
+
+  $("deconnexion").addEventListener("click", sortir);
+  $("actualiser").addEventListener("click", charger);
+  $("recherche").addEventListener("input", render);
+
+  document.querySelectorAll(".cotes button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      cote = b.dataset.cote;
+      var s = lire(); s.cote = cote; ecrire(s);
+      render();
+    });
+  });
+  $("serie-passer").addEventListener("click", function () {
+    var courant = document.querySelector("#liste li");
+    if (courant && courant.dataset.id) { passes.push(courant.dataset.id); render(); }
+  });
+  document.querySelectorAll("[data-lot]").forEach(function (b) {
+    b.addEventListener("click", function () { lot = b.dataset.lot; serie = false; passes = []; render(); });
+  });
+  document.querySelectorAll("[data-filtre]").forEach(function (b) {
+    b.addEventListener("click", function () { filtre = b.dataset.filtre; render(); });
+  });
+  document.querySelectorAll("[data-appel]").forEach(function (b) {
+    b.addEventListener("click", function () { appel = b.dataset.appel; render(); });
+  });
+
+  // Retour sur la page après l'envoi WhatsApp : le message est marqué comme envoyé
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState !== "visible" || !pending) return;
+    var p = pending;
+    pending = null;
+    if (Date.now() - p.t > 1500) marquer(p.id, p.type, true);
+  });
+
+  // ---------- démarrage ----------
+  var s0 = lire();
+  if (s0.refresh) {
+    auth("refresh_token", { refresh_token: s0.refresh }).then(entrer).catch(function (e) { if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE(); });
+  } else {
+    vue("connexion");
+  }
+})();
+</script>
+</body>
+</html>

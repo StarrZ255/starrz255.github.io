@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1a30">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Tableau de bord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a1a30; --card: #0f2742; --text: #f4efe6; --muted: #a9bdd8;
+      --ciel: #cfe2f7; --bebe: #b4d0ee; --bleuet: #5482de; --or: #c9a227;
+      --line: rgba(180, 208, 238, .22); --ok: #8fd6a4; --error: #ff9b9b;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(120% 40% at 50% -6%, rgba(20,76,205,.32), transparent 62%), var(--bg); background-attachment: fixed; color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    [hidden] { display: none !important; }
+    main { max-width: 720px; margin: 0 auto; padding: 0 16px 70px; }
+    h1 { font: 700 30px/1.1 "Cormorant Garamond", Georgia, serif; margin: 0; color: var(--or); }
+    h2 { font: 600 24px/1.2 "Cormorant Garamond", Georgia, serif; margin: 30px 0 12px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 0 6px; }
+    .texte-lien { background: none; border: 0; color: var(--bebe); font: inherit; font-size: 14px; padding: 10px 4px; min-height: 44px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .aide { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+    .erreur { color: var(--error); font-size: 14px; }
+    input { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-height: 46px; width: 100%; margin: 6px 0 14px; }
+    input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--ciel); outline-offset: 2px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 6px 18px; border: 0; border-radius: 8px; font: inherit; font-weight: 600; text-decoration: none; background: var(--ciel); color: var(--bg); cursor: pointer; transition: background-color .2s var(--ease), transform .15s var(--ease); }
+    .btn:hover { background: #e3effb; } .btn:active { transform: scale(.98); }
+    .btn.second { background: transparent; color: var(--bebe); border: 1px solid var(--line); font-weight: 500; }
+    #connexion { max-width: 420px; margin: 28px auto; padding: 24px 20px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+
+    .decompte { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .decompte div { padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: rgba(15,39,66,.6); }
+    .decompte strong { display: block; font-size: 34px; line-height: 1; color: var(--ciel); }
+    .decompte span { color: var(--muted); font-size: 14px; }
+
+    .actions { display: grid; gap: 10px; }
+    .action { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+    .action.fait { opacity: .75; }
+    .action .nb { font-size: 34px; font-weight: 700; line-height: 1; min-width: 34px; color: var(--or); }
+    .action.fait .nb { color: var(--ok); }
+    .action .texte { flex: 1; min-width: 0; }
+    .action .titre { font-weight: 600; }
+    .action .sous { color: var(--muted); font-size: 14px; }
+    .liste-relance { margin: 8px 0 0; padding: 0; list-style: none; }
+    .liste-relance li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+
+    .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 440px) { .grille { grid-template-columns: 1fr; } }
+    .kpi { padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+    .kpi .gros { font-size: 44px; font-weight: 700; line-height: 1; }
+    .kpi .gros small { font-size: 18px; font-weight: 500; color: var(--muted); }
+    .kpi .nom { margin-top: 6px; font-weight: 600; }
+    .kpi .detail { color: var(--muted); font-size: 14px; margin-top: 2px; }
+    .barre { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin-top: 10px; }
+    .barre i { display: block; height: 100%; background: var(--bleuet); transform-origin: left; transition: transform .6s var(--ease); }
+    .large { grid-column: 1 / -1; }
+    .evt { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .evt:last-child { border-bottom: 0; }
+    .evt .e { font-weight: 600; } .evt .n { font-size: 26px; font-weight: 700; color: var(--ok); }
+    .evt .d { grid-column: 1 / -1; color: var(--muted); font-size: 14px; }
+    .alerte { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--error); border-radius: 8px; color: var(--error); font-size: 14px; }
+    .maj { color: var(--muted); font-size: 13px; margin-top: 22px; text-align: center; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <h1>Tableau de bord</h1>
+    <button type="button" class="texte-lien" id="deconnexion" hidden>Se déconnecter</button>
+  </div>
+  <noscript><p class="aide">Activez JavaScript pour utiliser cette page.</p></noscript>
+
+  <section id="connexion" hidden>
+    <p class="aide">Réservé aux mariés.</p>
+    <form id="form-connexion">
+      <label>Adresse e-mail<input type="email" id="email" autocomplete="username" required></label>
+      <label>Mot de passe<input type="password" id="mdp" autocomplete="current-password" required></label>
+      <button type="submit" class="btn" id="btn-connexion" style="width:100%">Se connecter</button>
+      <p class="erreur" id="err-connexion" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <div class="decompte" id="decompte"></div>
+
+    <h2>À faire maintenant</h2>
+    <div class="actions" id="actions"></div>
+
+    <h2>Où en est-on</h2>
+    <div class="grille" id="kpi"></div>
+
+    <h2>Qui vient</h2>
+    <div class="kpi" id="evenements"></div>
+
+    <h2>La salle</h2>
+    <div class="grille" id="salle"></div>
+
+    <p class="erreur" id="err-app" role="alert" hidden></p>
+    <p class="maj"><span id="maj"></span> · <button type="button" class="texte-lien" id="actualiser">Actualiser</button></p>
+  </section>
+</main>
+
+<script src="/config.js"></script>
+<script src="/nav.js"></script>
+<script>
+(function () {
+  var C = window.MARIAGE;
+  var $ = function (id) { return document.getElementById(id); };
+  var CLE = "mariage-envoi";
+  var RELANCE_JOURS = 5;        // une invitation sans réponse après ce délai est à relancer
+  var session = null, timer = null;
+  var MOIS = { janvier: 0, "février": 1, mars: 2, avril: 3, mai: 4, juin: 5, juillet: 6, "août": 7, septembre: 8, octobre: 9, novembre: 10, "décembre": 11 };
+
+  function lire() { try { return JSON.parse(localStorage.getItem(CLE) || "{}"); } catch (e) { return {}; } }
+  function ecrire(o) { try { localStorage.setItem(CLE, JSON.stringify(o)); } catch (e) {} }
+  function brut(path, opts, jeton) {
+    opts = opts || {};
+    var h = { "apikey": C.supabaseKey, "Content-Type": "application/json" };
+    if (jeton) h["Authorization"] = "Bearer " + jeton;
+    return fetch(C.supabaseUrl + path, { method: opts.method || "GET", headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  }
+  function auth(grant, corps) {
+    return brut("/auth/v1/token?grant_type=" + grant, { method: "POST", body: corps }).then(function (r) {
+      if (!r.ok) throw new Error("auth " + r.status); return r.json();
+    }).then(function (j) { session = { access: j.access_token, refresh: j.refresh_token }; var s = lire(); s.refresh = j.refresh_token; ecrire(s); });
+  }
+  function api(path) {
+    return brut(path, {}, session && session.access).then(function (r) {
+      if (r.status !== 401) return r;
+      if (!session || !session.refresh) throw new Error("session");
+      return auth("refresh_token", { refresh_token: session.refresh }).then(function () { return brut(path, {}, session.access); });
+    }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); });
+  }
+  function h(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function pct(a, b) { return b ? Math.round(a * 100 / b) : 0; }
+  function plur(n, un, plusieurs) { return n + " " + (n > 1 ? plusieurs : un); }
+  function dateDe(texte) {
+    var m = String(texte || "").match(/(\d{1,2})\s+([a-zéûè]+)\s+(\d{4})/i);
+    return m && MOIS[m[2].toLowerCase()] !== undefined ? new Date(+m[3], MOIS[m[2].toLowerCase()], +m[1]) : null;
+  }
+  function jours(d) { var a = new Date(); a.setHours(0, 0, 0, 0); return Math.round((d - a) / 86400000); }
+
+  // ---------- calculs ----------
+  function typeEnvoi(g) { return g.segment; }                        // dot, jour_j ou tous : un seul message par invité
+  function envoye(g) { return g.envois && g.envois[typeEnvoi(g)]; }
+  function aRepondu(g) { return g.reponses && Object.keys(g.reponses).length > 0; }
+  function concerne(g, ev) { return ev === "dot" ? g.segment !== "jour_j" : g.segment !== "dot"; }
+
+  function calculer(tousLesGuests, evenements, tables) {
+    // Les personnes détaillées d'un groupe familial ne comptent pas comme des invitations : seul le parent porte lien, envoi et réponse
+    var membres = {};
+    tousLesGuests.forEach(function (g) { if (g.parent_id) (membres[g.parent_id] = membres[g.parent_id] || []).push(g); });
+    var guests = tousLesGuests.filter(function (g) { return !g.parent_id; });
+    var total = guests.length, nbEnvoyes = 0, nbReponses = 0, aRelancer = [], sansTel = 0, aPlacer = [], nbAppeles = 0;
+    var maintenant = Date.now();
+    guests.forEach(function (g) {
+      if (g.appele_le) nbAppeles++;
+      var e = envoye(g);
+      if (e) nbEnvoyes++;
+      if (aRepondu(g)) nbReponses++;
+      if (e && !aRepondu(g) && (maintenant - new Date(e).getTime()) > RELANCE_JOURS * 86400000) aRelancer.push(g);
+      if (!g.telephone) sansTel++;
+    });
+    var ev = {};
+    evenements.forEach(function (e) {
+      var o = { id: e.id, titre: e.titre, oui: 0, non: 0, attente: 0, arrives: 0 };
+      guests.forEach(function (g) {
+        if (!concerne(g, e.id)) return;
+        var r = g.reponses && g.reponses[e.id];
+        if (!r) o.attente += g.places;
+        else if (r.r === "oui") { o.oui += r.n || 1; if (g.arrive_le) o.arrives += r.n || 1; }
+        else o.non += g.places;
+      });
+      ev[e.id] = o;
+    });
+    // Invités confirmés au jour J (au moins un événement) sans table
+    var confirmesJJ = 0, places = 0;
+    guests.forEach(function (g) {
+      if (g.segment === "dot") return;
+      var n = 0;
+      ["mairie", "eglise", "reception"].forEach(function (k) { var r = g.reponses && g.reponses[k]; if (r && r.r === "oui") n = Math.max(n, r.n || 1); });
+      if (!n) return;
+      confirmesJJ += n;
+      var ms = membres[g.id] || [];
+      var places_g = (g.table_id ? Math.max(1, g.places - ms.length) : 0) + ms.filter(function (m) { return m.table_id; }).length;
+      places += Math.min(n, places_g);
+      if (places_g < n) aPlacer.push(g);
+    });
+    return {
+      appeles: nbAppeles, total: total, envoyes: nbEnvoyes, reponses: nbReponses, aRelancer: aRelancer, sansTel: sansTel, aPlacer: aPlacer,
+      ev: ev, confirmesJJ: confirmesJJ, places: places,
+      capacite: tables.reduce(function (s, t) { return s + t.capacite; }, 0), nbTables: tables.length,
+      restants: total - nbEnvoyes
+    };
+  }
+
+  // ---------- affichage ----------
+  function carteAction(nb, titre, sous, bouton) {
+    var a = h("div", "action" + (nb === 0 ? " fait" : ""));
+    a.appendChild(h("div", "nb", String(nb)));
+    var t = h("div", "texte"); t.appendChild(h("div", "titre", titre)); t.appendChild(h("div", "sous", nb === 0 ? "Rien à faire ici" : sous)); a.appendChild(t);
+    if (bouton && nb > 0) a.appendChild(bouton);
+    return a;
+  }
+  function lien(texte, href, cls) { var a = h("a", "btn " + (cls || ""), texte); a.href = href; return a; }
+
+  function relanceLien(g) {
+    var num = g.telephone ? g.telephone.replace(/\D/g, "") : "";
+    var url = (C.siteUrl || location.origin).replace(/\/$/, "") + "/i/" + g.token;
+    var txt = "Bonjour " + (g.nom_affiche || g.prenom) + ", petit rappel : pourriez-vous confirmer votre présence via votre lien personnel ? " + url + "\nMerci beaucoup !\nMarie-Christelle & René";
+    return "https://wa.me/" + num + "?text=" + encodeURIComponent(txt);
+  }
+
+  function dessiner(d, dates) {
+    var dc = $("decompte"); dc.innerHTML = "";
+    [["dot", "avant la dot"], ["jourj", "avant le mariage"]].forEach(function (x) {
+      var dt = dates[x[0]]; if (!dt) return;
+      var j = jours(dt), bloc = h("div");
+      bloc.appendChild(h("strong", null, j > 0 ? String(j) : (j === 0 ? "Aujourd'hui" : "Passé")));
+      bloc.appendChild(h("span", null, j > 0 ? (j > 1 ? "jours " : "jour ") + x[1] : (j === 0 ? x[1].replace("avant ", "") : "")));
+      dc.appendChild(bloc);
+    });
+
+    var ac = $("actions"); ac.innerHTML = "";
+    ac.appendChild(carteAction(d.restants, "Invitations à envoyer", "Pas encore envoyées", lien("Envoyer", "/envoi.html")));
+    var rel = carteAction(d.aRelancer.length, "À relancer", "Sans réponse depuis plus de " + RELANCE_JOURS + " jours", null);
+    if (d.aRelancer.length) {
+      var b = h("button", "btn second", "Voir"); b.type = "button";
+      var ul = h("ul", "liste-relance"); ul.hidden = true;
+      d.aRelancer.forEach(function (g) {
+        var li = h("li"); li.appendChild(h("span", null, g.nom_affiche || g.prenom)); li.appendChild(lien("Relancer", relanceLien(g)));
+        li.lastChild.target = "_blank"; li.lastChild.rel = "noopener"; ul.appendChild(li);
+      });
+      b.addEventListener("click", function () { ul.hidden = !ul.hidden; b.textContent = ul.hidden ? "Voir" : "Masquer"; });
+      rel.appendChild(b); ac.appendChild(rel); ac.appendChild(ul);
+    } else ac.appendChild(rel);
+    ac.appendChild(carteAction(d.total - d.appeles, "Personnes à appeler", "Pas encore appelées", lien("Voir", "/envoi.html")));
+    ac.appendChild(carteAction(d.sansTel, "Numéros manquants", "Invités sans numéro WhatsApp", lien("Ajouter", "/envoi.html")));
+    ac.appendChild(carteAction(d.aPlacer.length, "Invités à placer", d.aPlacer.length > 1 ? "Confirmés, sans table" : "Confirmé, sans table", lien("Ouvrir le plan", "/plan.html")));
+
+    var k = $("kpi"); k.innerHTML = "";
+    function kpi(gros, petit, nom, detail, p, large) {
+      var c = h("div", "kpi" + (large ? " large" : ""));
+      var g = h("div", "gros", gros); if (petit) g.appendChild(h("small", null, " " + petit)); c.appendChild(g);
+      c.appendChild(h("div", "nom", nom)); if (detail) c.appendChild(h("div", "detail", detail));
+      if (p !== undefined) { var b = h("div", "barre"); var i = h("i"); i.style.transform = "scaleX(" + Math.min(1, p / 100) + ")"; b.appendChild(i); c.appendChild(b); }
+      k.appendChild(c);
+    }
+    var pe = pct(d.envoyes, d.total), pr = pct(d.reponses, d.envoyes);
+    kpi(pe + " %", "", "Invitations envoyées", d.envoyes + " sur " + d.total, pe);
+    kpi(pr + " %", "", "Réponses reçues", d.reponses + " sur " + d.envoyes + " envoyées", pr);
+    var pa = pct(d.appeles, d.total);
+    kpi(pa + " %", "", "Personnes appelées", d.appeles + " sur " + d.total, pa);
+
+    var ev = $("evenements"); ev.innerHTML = "";
+    ["dot", "mairie", "eglise", "reception"].forEach(function (id) {
+      var o = d.ev[id]; if (!o) return;
+      var l = h("div", "evt");
+      l.appendChild(h("div", "e", o.titre));
+      l.appendChild(h("div", "n", String(o.oui)));
+      l.appendChild(h("div", "d", plur(o.oui, "personne présente", "personnes présentes") + " · " + plur(o.non, "absent", "absents") + " · " + o.attente + " sans réponse"));
+      ev.appendChild(l);
+    });
+
+    var s = $("salle"); s.innerHTML = "";
+    var rec = d.ev.reception ? d.ev.reception.oui : 0;
+    var c1 = h("div", "kpi"); var g1 = h("div", "gros", String(rec)); g1.appendChild(h("small", null, " / " + d.capacite)); c1.appendChild(g1);
+    c1.appendChild(h("div", "nom", "Places de la salle")); c1.appendChild(h("div", "detail", "Personnes confirmées à la réception"));
+    var b1 = h("div", "barre"), i1 = h("i"); i1.style.transform = "scaleX(" + Math.min(1, d.capacite ? rec / d.capacite : 0) + ")"; b1.appendChild(i1); c1.appendChild(b1);
+    var potentiel = rec + (d.ev.reception ? d.ev.reception.attente : 0);
+    if (rec > d.capacite) c1.appendChild(h("div", "alerte", "La salle est dépassée de " + (rec - d.capacite) + " places."));
+    else if (potentiel > d.capacite) c1.appendChild(h("div", "alerte", "Si tous ceux qui n'ont pas répondu viennent, il manquera " + (potentiel - d.capacite) + " places."));
+    s.appendChild(c1);
+    var c2 = h("div", "kpi"); var g2 = h("div", "gros", String(d.places)); g2.appendChild(h("small", null, " / " + d.confirmesJJ)); c2.appendChild(g2);
+    c2.appendChild(h("div", "nom", "Personnes placées")); c2.appendChild(h("div", "detail", plur(d.nbTables, "table", "tables") + " dans le plan"));
+    var b2 = h("div", "barre"), i2 = h("i"); i2.style.transform = "scaleX(" + Math.min(1, d.confirmesJJ ? d.places / d.confirmesJJ : 0) + ")"; b2.appendChild(i2); c2.appendChild(b2);
+    s.appendChild(c2);
+    var c3 = h("div", "kpi large"); var arr = d.ev.reception ? d.ev.reception.arrives : 0; var g3 = h("div", "gros", String(arr)); g3.appendChild(h("small", null, " arrivés sur " + rec + " attendus"));
+    c3.appendChild(g3); c3.appendChild(h("div", "nom", "Le jour du mariage")); c3.appendChild(h("div", "detail", "Mis à jour à chaque personne scannée à l'accueil"));
+    s.appendChild(c3);
+
+    $("maj").textContent = "Mis à jour à " + new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function charger() {
+    return Promise.all([
+      api("/rest/v1/guests?select=id,prenom,nom_affiche,places,segment,telephone,token,envois,reponses,table_id,arrive_le,appele_le,parent_id&limit=1000"),
+      api("/rest/v1/evenements?select=id,titre,jour,groupe,ordre&order=ordre.asc"),
+      api("/rest/v1/tables_salle?select=capacite")
+    ]).then(function (r) {
+      var dates = {}, dotEv = r[1].filter(function (e) { return e.groupe === "dot"; })[0], jj = r[1].filter(function (e) { return e.groupe === "jour_j"; })[0];
+      dates.dot = dotEv && dateDe(dotEv.jour); dates.jourj = jj && dateDe(jj.jour);
+      $("err-app").hidden = true;
+      dessiner(calculer(r[0], r[1], r[2]), dates);
+    }).catch(function (e) {
+      if (e.message === "session" || /auth|http 40[13]/.test(e.message)) { sortir(); return; }
+      $("err-app").textContent = "Chargement impossible. Vérifiez votre connexion puis touchez Actualiser."; $("err-app").hidden = false;
+    });
+  }
+
+  function vue(n) { $("connexion").hidden = n !== "connexion"; $("app").hidden = n !== "app"; $("deconnexion").hidden = n !== "app"; }
+  function entrer() { vue("app"); clearInterval(timer); timer = setInterval(charger, 60000); return charger(); }
+  function sortir() { clearInterval(timer); session = null; var s = lire(); delete s.refresh; ecrire(s); vue("connexion"); }
+
+  $("actualiser").addEventListener("click", charger);
+  $("deconnexion").addEventListener("click", sortir);
+  $("form-connexion").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = $("err-connexion"); err.hidden = true;
+    auth("password", { email: $("email").value.trim(), password: $("mdp").value }).then(entrer)
+      .catch(function () { err.textContent = "Connexion refusée. Vérifiez l'adresse et le mot de passe."; err.hidden = false; });
+  });
+  var s0 = lire();
+  if (s0.refresh) auth("refresh_token", { refresh_token: s0.refresh }).then(entrer).catch(function (e) { if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE(); }); else vue("connexion");
+})();
+</script>
+</body>
+</html>

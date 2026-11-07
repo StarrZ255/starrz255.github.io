@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="fr" data-theme="nuit">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1a30">
+  <title>Marie-Christelle &amp; René</title>
+  <meta name="robots" content="noindex">
+
+  <!-- Aperçu WhatsApp : identique pour tous les invités et volontairement sans date ni lieu.
+       Pour ajouter une photo : placer site/img/apercu.jpg (1200x630) et remettre og:image avec l'adresse complète. -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Marie-Christelle &amp; René">
+  <meta property="og:description" content="Ouvrez votre invitation personnelle.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+  <style>
+    /* Deux thèmes : « nuit » (marine et or) et « dot » (crème, bordeaux et or, pagne) */
+    :root, :root[data-theme="nuit"] {
+      color-scheme: dark;
+      --bg: #0a1a30;
+      --fond-haut: rgba(20, 76, 205, .38);
+      --fond-bas: rgba(84, 130, 222, .16);
+      --card: #0f2742;
+      --text: #f4efe6;
+      --muted: #a9bdd8;
+      --titre: #c9a227;
+      --accent: #cfe2f7;
+      --bouton: #cfe2f7;
+      --bouton-texte: #0a1a30;
+      --bouton-survol: #e3effb;
+      --or: #c9a227;
+      --line: rgba(180, 208, 238, .28);
+      --error: #ff9b9b;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+    :root[data-theme="dot"] {
+      color-scheme: light;
+      --bg: #f3e6c3;
+      --fond-haut: rgba(255, 252, 238, .9);
+      --fond-bas: rgba(214, 178, 96, .35);
+      --card: #fbf3dc;
+      --text: #7b1523;
+      --muted: #8c4a52;
+      --titre: #7b1523;
+      --accent: #7b1523;
+      --bouton: #7b1523;
+      --bouton-texte: #fbf3dc;
+      --bouton-survol: #93222f;
+      --or: #b8902a;
+      --line: rgba(123, 21, 35, .28);
+      --error: #a62b2b;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(120% 60% at 50% -8%, var(--fond-haut), transparent 62%),
+        radial-gradient(90% 50% at 50% 108%, var(--fond-bas), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
+      color: var(--text);
+      font: 500 19px/1.5 "Cormorant Garamond", Georgia, "Times New Roman", serif;
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px 56px;
+    }
+    main { position: relative; width: 100%; max-width: 480px; padding-bottom: 66px; }
+    h1, h2, h3, p { text-wrap: balance; }
+    [hidden] { display: none !important; }
+
+    /* Pagne kenté : bande fixe à gauche, thème dot seulement */
+    .pagne { position: fixed; top: 0; bottom: 0; left: 0; width: 22px; background: url("img/pagne.jpg") center / cover; border-right: 3px solid var(--or); box-shadow: 4px 0 10px -4px rgba(0, 0, 0, .35); }
+    :root[data-theme="dot"] body { padding-left: 38px; }
+    :root:not([data-theme="dot"]) .pagne { display: none; }
+
+    /* Ornements floraux, thème nuit seulement */
+    .deco { position: absolute; width: 84px; height: 75px; pointer-events: none; }
+    .deco-haut { top: -10px; left: -14px; }
+    .deco-bas { right: -12px; bottom: -40px; transform: rotate(180deg); }
+    :root[data-theme="dot"] .deco { display: none; }
+    @media (min-width: 520px) { .deco { width: 168px; height: 150px; } .deco-haut { left: -30px; } .deco-bas { right: -30px; } }
+
+    header { position: relative; text-align: center; padding: 56px 0 20px; }
+    h1 { margin: 0; font: 400 clamp(40px, 12vw, 56px)/1.08 "Pinyon Script", "Cormorant Garamond", cursive; color: var(--titre); }
+    h1 span { display: block; }
+    h1 .esp { font: italic 500 .6em/1.2 "Cormorant Garamond", Georgia, serif; color: var(--or); }
+    .invitation { margin: 14px auto 0; max-width: 24ch; color: var(--muted); font-size: 24px; line-height: 1.35; font-style: italic; }
+    .filet { display: flex; align-items: center; gap: 12px; margin: 16px auto 0; max-width: 240px; color: var(--or); }
+    .filet::before, .filet::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .65; }
+    .filet svg { width: 11px; height: 11px; flex: none; }
+
+    .card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--or);
+      border-radius: 4px;
+      padding: 28px 22px 24px;
+      margin: 0 0 18px;
+      box-shadow: 0 22px 44px -26px rgba(0, 0, 0, .55), 0 2px 6px rgba(0, 0, 0, .15);
+    }
+    .card::before { content: ""; position: absolute; inset: 5px; border: 1px solid color-mix(in srgb, var(--or) 38%, transparent); border-radius: 2px; pointer-events: none; }
+    h2 { font-size: 28px; font-weight: 600; margin: 0 0 16px; text-align: center; line-height: 1.2; }
+    h3 { font-size: 26px; font-weight: 700; margin: 0; text-align: center; line-height: 1.2; }
+    .jour { margin: 4px 0 14px; text-align: center; color: var(--muted); letter-spacing: .04em; }
+
+    .lignes { list-style: none; margin: 0 0 18px; padding: 0; }
+    .lignes li { display: grid; grid-template-columns: 86px 1fr; column-gap: 14px; align-items: baseline; padding: 8px 0; }
+    .lignes b { color: var(--accent); font-weight: 700; font-size: 21px; text-align: right; }
+    .lignes .lieu { color: var(--muted); font-size: 18px; line-height: 1.3; }
+    .lignes .lieu strong { display: block; color: var(--text); font-size: 20px; }
+    .lignes a { color: var(--accent); text-underline-offset: 3px; font-size: 17px; }
+
+    .choix { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 6px; }
+    .choix label {
+      position: relative; display: flex; align-items: center; justify-content: center; gap: 9px;
+      min-height: 56px; padding: 10px 8px; border: 1px solid var(--line); border-radius: 6px;
+      text-align: center; line-height: 1.2; cursor: pointer; color: var(--muted);
+      transition: border-color .2s var(--ease), background-color .2s var(--ease), color .2s var(--ease);
+    }
+    .choix label::before { content: ""; flex: none; width: 16px; height: 16px; border: 1.5px solid var(--accent); border-radius: 50%; transition: background-color .2s var(--ease), box-shadow .2s var(--ease); }
+    .choix input { position: absolute; opacity: 0; pointer-events: none; }
+    .choix label:hover { border-color: var(--accent); }
+    .choix label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--text); font-weight: 700; }
+    .choix label:has(input:checked)::before { background: var(--accent); box-shadow: inset 0 0 0 3px var(--card); }
+    .choix label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    .champ { margin: 16px 0 0; }
+    .champ label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 17px; }
+    select, textarea { width: 100%; font: inherit; color: var(--text); background-color: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; transition: border-color .2s var(--ease); }
+    select:hover, textarea:hover { border-color: var(--accent); }
+    select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    select { appearance: none; padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none' stroke='%23999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1.5 1.5 5.5 5.5 5.5-5.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+    textarea { min-height: 96px; resize: vertical; }
+
+    button { width: 100%; min-height: 54px; font: inherit; font-weight: 700; font-size: 20px; letter-spacing: .05em; background: var(--bouton); color: var(--bouton-texte); border: 0; border-radius: 6px; padding: 12px; cursor: pointer; transition: background-color .2s var(--ease), transform .15s var(--ease); }
+    button:hover { background: var(--bouton-survol); }
+    button:active { transform: scale(.985); }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    button:disabled { opacity: .65; cursor: default; transform: none; }
+    .lien { background: none; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; font-size: 18px; letter-spacing: 0; margin-top: 10px; min-height: 48px; }
+    .lien:hover { background: none; color: var(--accent); }
+
+    .resume { list-style: none; margin: 0 0 6px; padding: 0; }
+    .resume li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .resume li:last-child { border-bottom: 0; }
+    .resume .oui { font-weight: 700; color: var(--accent); }
+    .resume .non { color: var(--muted); }
+    .table-box { margin-top: 20px; padding: 16px; border: 1px solid var(--or); border-radius: 4px; text-align: center; }
+    .table-box strong { display: block; font-size: 30px; line-height: 1.2; margin-top: 2px; color: var(--accent); }
+    .qr-box { margin-top: 20px; text-align: center; }
+    .qr-box p { margin: 0 0 10px; }
+    .qr-box .ref { margin: 12px 0 0; }
+    .qr-box .ref strong { display: block; font-size: 26px; letter-spacing: .08em; color: var(--accent); }
+    #qr { display: inline-block; width: 190px; padding: 10px; background: #fff; border-radius: 6px; line-height: 0; }
+    #qr svg { width: 100%; height: auto; }
+    .erreur { color: var(--error); margin: 14px 0 0; text-align: center; }
+    .muted { color: var(--muted); }
+    #merci-texte, #introuvable p, #chargement p { text-align: center; margin: 0 0 14px; }
+    #chargement { padding-block: 26px; }
+    .devise { position: relative; margin: 30px 0 0; text-align: center; font: 400 28px/1.2 "Pinyon Script", cursive; color: var(--titre); }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .rise { animation: rise 1s var(--ease) both; animation-delay: calc(var(--i, 0) * 110ms); }
+      .card:not([hidden]) { animation: rise .7s var(--ease) both; animation-delay: .3s; }
+      @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    }
+  </style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="petale" d="M0 0C-15-5-18-27 0-43C18-27 15-5 0 0Z"/>
+    <path id="feuille" d="M0 0C5-8 17-8 25 0C17 8 5 8 0 0Z"/>
+    <symbol id="fleur" viewBox="-50 -50 100 100">
+      <g fill="#e6dcc8" stroke="#c9a227" stroke-opacity=".55" stroke-width=".6">
+        <use href="#petale" transform="rotate(0)"/><use href="#petale" transform="rotate(72)"/><use href="#petale" transform="rotate(144)"/><use href="#petale" transform="rotate(216)"/><use href="#petale" transform="rotate(288)"/>
+      </g>
+      <g fill="#f8f3e9" stroke="#c9a227" stroke-opacity=".5" stroke-width=".6" transform="scale(.82)">
+        <use href="#petale" transform="rotate(36)"/><use href="#petale" transform="rotate(108)"/><use href="#petale" transform="rotate(180)"/><use href="#petale" transform="rotate(252)"/><use href="#petale" transform="rotate(324)"/>
+      </g>
+      <circle r="7" fill="#c9a227"/>
+      <g fill="#8c6f12"><circle cx="0" cy="-4" r="1"/><circle cx="3.8" cy="-1.2" r="1"/><circle cx="2.4" cy="3.2" r="1"/><circle cx="-2.4" cy="3.2" r="1"/><circle cx="-3.8" cy="-1.2" r="1"/></g>
+    </symbol>
+    <symbol id="branche" viewBox="0 0 150 90">
+      <path d="M4 80C40 78 90 62 142 12" fill="none" stroke="#c9a227" stroke-width="1.3" stroke-linecap="round"/>
+      <g fill="#c9a227" fill-opacity=".9">
+        <use href="#feuille" transform="translate(24 78) rotate(-62) scale(.9)"/><use href="#feuille" transform="translate(36 76) rotate(18) scale(.85)"/>
+        <use href="#feuille" transform="translate(56 71) rotate(-58) scale(.95)"/><use href="#feuille" transform="translate(70 66) rotate(22) scale(.9)"/>
+        <use href="#feuille" transform="translate(92 54) rotate(-52) scale(.8)"/><use href="#feuille" transform="translate(104 46) rotate(26) scale(.75)"/>
+        <use href="#feuille" transform="translate(124 28) rotate(-45) scale(.6)"/>
+      </g>
+    </symbol>
+    <symbol id="ornement" viewBox="0 0 168 150">
+      <use href="#branche" x="10" y="52" width="150" height="90"/>
+      <use href="#fleur" x="-4" y="-6" width="104" height="104"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="pagne" aria-hidden="true"></div>
+
+<main>
+  <svg class="deco deco-haut" aria-hidden="true"><use href="#ornement"/></svg>
+
+  <header>
+    <h1 id="couple" class="rise" style="--i:0"></h1>
+    <p class="invitation rise" style="--i:1" id="invitation" hidden></p>
+    <div class="filet rise" style="--i:2" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M5 0 10 5 5 10 0 5Z" fill="currentColor"/></svg></div>
+  </header>
+
+  <noscript><section class="card"><p class="muted" style="text-align:center;margin:0">Activez JavaScript pour répondre à l'invitation.</p></section></noscript>
+
+  <section class="card" id="chargement"><p class="muted">Chargement…</p></section>
+
+  <section class="card" id="introuvable" hidden>
+    <h2>Lien introuvable</h2>
+    <p class="muted">Ce lien d'invitation n'est pas valide. Vérifiez le message reçu ou contactez les mariés.</p>
+  </section>
+
+  <form id="rsvp" novalidate hidden>
+    <h2 id="bonjour" style="margin-bottom:18px"></h2>
+    <div id="evenements"></div>
+    <section class="card">
+      <div class="champ" style="margin-top:0">
+        <label for="message">Un mot pour les mariés (facultatif)</label>
+        <textarea id="message" maxlength="500"></textarea>
+      </div>
+      <p class="erreur" id="erreur" role="alert" hidden></p>
+      <button type="submit" id="envoyer" style="margin-top:18px">Confirmer ma réponse</button>
+      <p class="muted" id="delai" style="text-align:center;margin:14px 0 0"></p>
+    </section>
+  </form>
+
+  <section class="card" id="merci" hidden>
+    <h2 id="merci-titre"></h2>
+    <ul class="resume" id="resume"></ul>
+    <div class="table-box" id="table-box" hidden>
+      <span class="muted">Votre table</span>
+      <strong id="table-nom"></strong>
+    </div>
+    <div class="qr-box" id="qr-box" hidden>
+      <p class="muted">Présentez ce code à l'accueil, le jour de la fête</p>
+      <div id="qr" role="img" aria-label="Votre code d'entrée personnel"></div>
+      <p class="muted ref" id="ref-box" hidden>Si le code ne se lit pas, donnez votre référence : <strong id="ref"></strong></p>
+    </div>
+    <button type="button" class="lien" id="modifier">Modifier ma réponse</button>
+  </section>
+
+  <p class="devise" id="devise"></p>
+  <svg class="deco deco-bas" aria-hidden="true"><use href="#ornement"/></svg>
+</main>
+
+<script src="/config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function () {
+  var C = window.MARIAGE;
+  function baseUrl() { return (C.siteUrl || location.origin).replace(/\/$/, ""); }
+  var $ = function (id) { return document.getElementById(id); };
+
+  document.title = C.couple;
+  C.couple.split(" & ").forEach(function (n, i) {
+    if (i > 0) { var e = document.createElement("span"); e.className = "esp"; e.textContent = "&"; $("couple").appendChild(e); }
+    var s = document.createElement("span"); s.textContent = n; $("couple").appendChild(s);
+  });
+  $("couple").setAttribute("aria-label", C.couple);
+  $("devise").textContent = C.devise || "";
+  if (C.reponseAvant) $("delai").textContent = C.reponseAvant; else $("delai").hidden = true;
+
+  // Jeton : /i/<jeton> en production, ?t=<jeton> pour tester en local
+  var m = location.pathname.match(/\/i\/([A-Za-z0-9]+)/);
+  var token = m ? m[1] : new URLSearchParams(location.search).get("t");
+
+  function show(id) {
+    ["chargement", "introuvable", "rsvp", "merci"].forEach(function (s) { $(s).hidden = s !== id; });
+  }
+
+  function rpc(fn, body) {
+    return fetch(C.supabaseUrl + "/rest/v1/rpc/" + fn, {
+      method: "POST",
+      headers: { "apikey": C.supabaseKey, "Authorization": "Bearer " + C.supabaseKey, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); });
+  }
+
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+
+  var inv = null;
+
+  function repondu() { return inv && inv.reponses && Object.keys(inv.reponses).length > 0; }
+  function choix(id) { var r = document.querySelector('input[name="r-' + id + '"]:checked'); return r ? r.value : null; }
+
+  function majNb(id) {
+    var champ = $("nb-" + id);
+    if (champ) champ.hidden = inv.places < 2 || choix(id) !== "oui";
+  }
+
+  function rendreEvenements() {
+    var conteneur = $("evenements");
+    conteneur.innerHTML = "";
+    inv.programme.forEach(function (ev) {
+      var card = el("section", "card");
+      card.appendChild(el("h3", null, ev.titre));
+      card.appendChild(el("p", "jour", ev.jour));
+      var ul = el("ul", "lignes");
+      ev.lignes.forEach(function (l) {
+        var li = el("li");
+        li.appendChild(el("b", null, l.heure));
+        var lieu = el("div", "lieu");
+        lieu.appendChild(el("strong", null, l.libelle));
+        lieu.appendChild(document.createTextNode(l.lieu));
+        if (l.maps) {
+          var a = el("a", null, "Voir l'itinéraire");
+          a.href = l.maps; a.target = "_blank"; a.rel = "noopener";
+          lieu.appendChild(document.createElement("br"));
+          lieu.appendChild(a);
+        }
+        li.appendChild(lieu);
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
+
+      var groupe = el("div", "choix");
+      groupe.setAttribute("role", "radiogroup");
+      groupe.setAttribute("aria-label", "Votre réponse : " + ev.titre);
+      [["oui", "Je serai là"], ["non", "Je ne pourrai pas"]].forEach(function (c) {
+        var lab = el("label");
+        var inp = document.createElement("input");
+        inp.type = "radio"; inp.name = "r-" + ev.id; inp.value = c[0];
+        if (inv.reponses && inv.reponses[ev.id] && inv.reponses[ev.id].r === c[0]) inp.checked = true;
+        inp.addEventListener("change", function () { majNb(ev.id); });
+        lab.appendChild(inp);
+        lab.appendChild(el("span", null, c[1]));
+        groupe.appendChild(lab);
+      });
+      card.appendChild(groupe);
+
+      if (inv.places > 1) {
+        var champ = el("div", "champ"); champ.id = "nb-" + ev.id;
+        var lab = el("label", null, "Nombre de personnes"); lab.setAttribute("for", "n-" + ev.id);
+        var sel = document.createElement("select"); sel.id = "n-" + ev.id;
+        for (var i = 1; i <= inv.places; i++) { var o = document.createElement("option"); o.value = i; o.textContent = i === 1 ? "1 personne" : i + " personnes"; sel.appendChild(o); }
+        var prec = inv.reponses && inv.reponses[ev.id] && inv.reponses[ev.id].n;
+        sel.value = prec && prec <= inv.places ? prec : inv.places;
+        champ.appendChild(lab); champ.appendChild(sel);
+        card.appendChild(champ);
+      }
+      conteneur.appendChild(card);
+      majNb(ev.id);
+    });
+  }
+
+  function afficherFormulaire() {
+    $("bonjour").textContent = "Bonjour " + inv.prenom;
+    $("message").value = inv.message || "";
+    rendreEvenements();
+    $("erreur").hidden = true;
+    show("rsvp");
+  }
+
+  function afficherMerci() {
+    var ul = $("resume");
+    ul.innerHTML = "";
+    var nbOui = 0;
+    inv.programme.forEach(function (ev) {
+      var r = inv.reponses[ev.id];
+      if (!r) return;
+      var li = el("li");
+      li.appendChild(el("span", null, ev.titre));
+      var oui = r.r === "oui";
+      if (oui) nbOui++;
+      li.appendChild(el("span", oui ? "oui" : "non", oui ? (r.n > 1 ? "Présent, " + r.n + " personnes" : "Présent") : "Absent"));
+      ul.appendChild(li);
+    });
+    $("merci-titre").textContent = nbOui ? "Merci, à très bientôt" : "Merci d'avoir répondu";
+    $("table-box").hidden = !(nbOui && inv.table_nom);
+    if (inv.table_nom) $("table-nom").textContent = inv.table_nom;
+    // Code d'entrée : seulement pour qui vient à une des cérémonies ou à la réception (pas la dot seule)
+    var vientJourJ = inv.programme.some(function (ev) { return ev.id !== "dot" && inv.reponses[ev.id] && inv.reponses[ev.id].r === "oui"; });
+    $("qr-box").hidden = true;
+    $("ref-box").hidden = !inv.reference;
+    if (inv.reference) $("ref").textContent = inv.reference;
+    if (vientJourJ && typeof qrcode === "function") {
+      try {
+        var q = qrcode(0, "M");
+        q.addData(baseUrl() + "/a/" + token);
+        q.make();
+        $("qr").innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+        $("qr-box").hidden = false;
+      } catch (e) {}
+    }
+    show("merci");
+  }
+
+  function charger() {
+    if (!token) { show("introuvable"); return; }
+    rpc("get_invite", { p_token: token }).then(function (rows) {
+      if (!rows.length) { show("introuvable"); return; }
+      inv = rows[0];
+      document.documentElement.dataset.theme = inv.segment === "dot" ? "dot" : "nuit";
+      document.querySelector('meta[name="theme-color"]').content = inv.segment === "dot" ? "#f3e6c3" : "#0a1a30";
+      $("invitation").textContent = inv.invitation;
+      $("invitation").hidden = false;
+      if (repondu()) afficherMerci(); else afficherFormulaire();
+    }).catch(function () { show("introuvable"); });
+  }
+
+  $("modifier").addEventListener("click", afficherFormulaire);
+
+  $("rsvp").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = $("erreur"), btn = $("envoyer"), reps = {}, manque = false;
+    inv.programme.forEach(function (ev) {
+      var c = choix(ev.id);
+      if (!c) { manque = true; return; }
+      var n = c === "oui" ? (inv.places > 1 ? parseInt($("n-" + ev.id).value, 10) || 1 : 1) : 0;
+      reps[ev.id] = { r: c, n: n };
+    });
+    if (manque) { err.textContent = "Répondez pour chaque événement avant de confirmer."; err.hidden = false; return; }
+    err.hidden = true;
+    btn.disabled = true; btn.textContent = "Envoi en cours…";
+    rpc("submit_rsvp", { p_token: token, p_reponses: reps, p_message: $("message").value })
+      .then(function (ok) {
+        if (ok !== true) throw new Error("refus");
+        inv.reponses = reps; inv.message = $("message").value;
+        afficherMerci();
+      })
+      .catch(function () { err.textContent = "L'envoi n'a pas abouti. Vérifiez votre connexion et réessayez."; err.hidden = false; })
+      .then(function () { btn.disabled = false; btn.textContent = "Confirmer ma réponse"; });
+  });
+
+  charger();
+})();
+</script>
+</body>
+</html>

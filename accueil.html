@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1a30">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Accueil des invités</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; --bg:#0a1a30; --card:#0f2742; --text:#f4efe6; --muted:#a9bdd8; --ciel:#cfe2f7; --bebe:#b4d0ee; --or:#c9a227; --line:rgba(180,208,238,.22); --ok:#8fd6a4; --warn:#f0c674; --error:#ff9b9b; --ease:cubic-bezier(.16,1,.3,1); }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin:0; min-height:100vh; background: radial-gradient(120% 40% at 50% -6%, rgba(20,76,205,.32), transparent 62%), var(--bg); background-attachment: fixed; color:var(--text); font:18px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; display:flex; justify-content:center; }
+    [hidden] { display:none !important; }
+    main { width:100%; max-width:520px; padding:0 16px 60px; }
+    h1 { font:700 28px/1.15 "Cormorant Garamond",Georgia,serif; margin:0; color:var(--or); }
+    .topbar { padding:20px 0 12px; }
+    .aide { color:var(--muted); font-size:14px; margin:0 0 12px; }
+    .erreur { color:var(--error); font-size:14px; margin:10px 0 0; }
+    input { font:inherit; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px 14px; min-height:52px; width:100%; }
+    input:focus-visible, button:focus-visible { outline:2px solid var(--ciel); outline-offset:2px; }
+    label.champ { display:block; font-size:14px; color:var(--muted); margin:0 0 14px; } label.champ input { margin-top:6px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; min-height:54px; padding:8px 18px; border:0; border-radius:10px; font:inherit; font-weight:600; background:var(--ciel); color:var(--bg); cursor:pointer; width:100%; transition:background-color .2s var(--ease), transform .15s var(--ease); }
+    .btn:hover { background:#e3effb; } .btn:active { transform:scale(.98); }
+    .btn.second { background:transparent; color:var(--bebe); border:1px solid var(--line); font-weight:500; }
+    .carte { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 18px; margin-bottom:14px; }
+    .invite .nom { font:700 32px/1.1 "Cormorant Garamond",Georgia,serif; margin:0 0 4px; overflow-wrap:anywhere; }
+    .ref { color:var(--muted); font-size:15px; margin:0 0 12px; }
+    .statut { margin:0 0 14px; padding:10px 12px; border-radius:8px; font-weight:600; border:1px solid var(--line); }
+    .statut.ok { color:var(--ok); border-color:var(--ok); } .statut.warn { color:var(--warn); border-color:var(--warn); } .statut.non { color:var(--error); border-color:var(--error); }
+    .table-gros { margin:0 0 14px; padding:16px; border:1px solid var(--or); border-radius:10px; text-align:center; }
+    .table-gros span { color:var(--muted); font-size:14px; } .table-gros strong { display:block; font-size:44px; line-height:1.1; color:var(--ciel); }
+    .table-gros.sans strong { font-size:22px; color:var(--error); }
+    #mini { display:block; width:100%; height:auto; background:#0c2038; border-radius:8px; margin:0 0 14px; }
+    #mini .mur { fill:none; stroke:var(--bebe); stroke-width:.55; stroke-linecap:square; stroke-linejoin:miter; opacity:.9; }
+    #mini .t { fill:#14365b; stroke:var(--bebe); stroke-width:.3; }
+    #mini .t.cible { fill:var(--or); stroke:#fff; stroke-width:.6; }
+    #mini text { fill:var(--bebe); text-anchor:middle; font-size:3px; }
+    #mini .cible-txt { fill:#0a1a30; font-size:4px; font-weight:700; }
+    #mini .r { fill:rgba(143,214,164,.16); stroke:var(--ok); stroke-width:.3; } #mini .r.scene { fill:rgba(84,130,222,.25); stroke:#5482de; } #mini .r.zone { fill:none; stroke-dasharray:1 1; stroke:var(--or); }
+    #video { width:100%; border-radius:10px; background:#000; aspect-ratio:3/4; object-fit:cover; margin-top:12px; }
+    .liste { list-style:none; margin:10px 0 0; padding:0; }
+    .liste li button { width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--text); font:inherit; padding:12px 2px; min-height:52px; cursor:pointer; }
+    .liste .sous { color:var(--muted); font-size:13px; display:block; }
+    .pied { text-align:center; margin-top:26px; }
+    .texte-lien { background:none; border:0; color:var(--muted); font:inherit; font-size:13px; padding:10px 4px; min-height:44px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+      .groupe-liste { list-style: none; margin: 8px 0 14px; padding: 0; }
+    .groupe-liste li { padding: 8px 0; border-bottom: 1px solid var(--line); font-weight: 600; }
+    .groupe-liste .sous { display: block; font-weight: 400; color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topbar"><h1>Accueil des invités</h1></div>
+  <noscript><p class="aide">Activez JavaScript pour utiliser cette page.</p></noscript>
+
+  <section id="connexion" class="carte" hidden>
+    <p class="aide">Connexion de l'équipe d'accueil. Une seule fois : votre téléphone reste connecté.</p>
+    <form id="form-connexion">
+      <label class="champ">Adresse e-mail<input type="email" id="email" autocomplete="username" required></label>
+      <label class="champ">Mot de passe<input type="password" id="mdp" autocomplete="current-password" required></label>
+      <button type="submit" class="btn" id="btn-connexion">Se connecter</button>
+      <p class="erreur" id="err-connexion" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <div class="carte" id="outils">
+      <button type="button" class="btn" id="scanner">Scanner un QR</button>
+      <video id="video" playsinline muted hidden></video>
+      <p class="aide" id="aide-scan" style="margin-top:12px" hidden></p>
+      <label class="champ" style="margin:16px 0 0">Ou chercher une référence ou un nom
+        <input type="search" id="recherche" placeholder="RMC-043 ou nom de l'invité" autocomplete="off">
+      </label>
+      <ul class="liste" id="resultats"></ul>
+    </div>
+    <div id="fiche" hidden></div>
+    <p class="erreur" id="err-app" role="alert" hidden></p>
+    <p class="pied"><button type="button" class="texte-lien" id="deconnexion">Se déconnecter de cet appareil</button></p>
+  </section>
+</main>
+
+<script src="/config.js"></script>
+<script>
+(function () {
+  var C = window.MARIAGE, NS = "http://www.w3.org/2000/svg";
+  var $ = function (id) { return document.getElementById(id); };
+  var CLE = "mariage-envoi";   // même connexion que les autres pages
+  var session = null, flux = null, scanTimer = null, recT = null, plan = null;
+
+  function lire() { try { return JSON.parse(localStorage.getItem(CLE) || "{}"); } catch (e) { return {}; } }
+  function ecrire(o) { try { localStorage.setItem(CLE, JSON.stringify(o)); } catch (e) {} }
+  function brut(path, corps, jeton) {
+    var h = { "apikey": C.supabaseKey, "Content-Type": "application/json" };
+    if (jeton) h["Authorization"] = "Bearer " + jeton;
+    return fetch(C.supabaseUrl + path, { method: "POST", headers: h, body: JSON.stringify(corps || {}) });
+  }
+  function auth(grant, corps) {
+    return brut("/auth/v1/token?grant_type=" + grant, corps).then(function (r) {
+      if (!r.ok) throw new Error("auth " + r.status); return r.json();
+    }).then(function (j) { session = { access: j.access_token, refresh: j.refresh_token }; var s = lire(); s.refresh = j.refresh_token; ecrire(s); });
+  }
+  // Appel d'une fonction de la base ; jeton expiré : renouvelé sans que l'on retape quoi que ce soit
+  function rpc(fn, corps) {
+    return brut("/rest/v1/rpc/" + fn, corps, session && session.access).then(function (r) {
+      if (r.status !== 401) return r;
+      if (!session || !session.refresh) throw new Error("session");
+      return auth("refresh_token", { refresh_token: session.refresh }).then(function () { return brut("/rest/v1/rpc/" + fn, corps, session.access); });
+    }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); });
+  }
+  function h(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function sv(tag, attrs, txt) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (txt != null) e.textContent = txt; return e; }
+  function erreur(t) { $("err-app").textContent = t || ""; $("err-app").hidden = !t; }
+  function gererErreur(e) {
+    if (e && (e.message === "session" || /^auth 4|http 40[13]/.test(e.message))) { sortir(); return; }
+    erreur("Pas de réseau pour le moment. Vous restez connecté : réessayez dans un instant.");
+  }
+
+  // ---------- mini-plan : la table de l'invité en doré ----------
+  function miniPlan(cibles) {
+    var s = sv("svg", { id: "mini", viewBox: "0 0 110 160", role: "img", "aria-label": "Plan de la salle" });
+    plan.reperes.forEach(function (r) {
+      var g = sv("g", { transform: "translate(" + r.x + " " + r.y + ")" });
+      g.appendChild(sv("rect", { "class": "r " + r.type, x: -r.w / 2, y: -r.h / 2, width: r.w, height: r.h, rx: 1 }));
+      g.appendChild(sv("text", { x: 0, y: 1 }, r.nom));
+      s.appendChild(g);
+    });
+    (plan.murs || []).forEach(function (pts) {
+      s.appendChild(sv("polyline", { "class": "mur", points: pts.map(function (q) { return q[0] + "," + q[1]; }).join(" ") }));
+    });
+    plan.tables.forEach(function (t) {
+      var cible = cibles.indexOf(t.id) !== -1, g = sv("g", { transform: "translate(" + t.x + " " + t.y + ")" });
+      var w = t.forme === "rect" ? 13 : 9.5, hh = t.forme === "rect" ? 8 : 9.5, k = "t" + (cible ? " cible" : "");
+      g.appendChild(t.forme === "ronde" ? sv("circle", { "class": k, r: w / 2 }) : sv("rect", { "class": k, x: -w / 2, y: -hh / 2, width: w, height: hh, rx: 1 }));
+      g.appendChild(sv("text", { "class": cible ? "cible-txt" : "", x: 0, y: cible ? 1.4 : 1 }, String(t.numero)));
+      s.appendChild(g);
+    });
+    return s;
+  }
+
+  function fiche(g) {
+    var f = $("fiche"); f.innerHTML = ""; f.hidden = false; erreur("");
+    var c = h("div", "carte invite");
+    c.appendChild(h("div", "nom", g.prenom));
+    if (g.reference) c.appendChild(h("p", "ref", "Référence " + g.reference));
+    var st;
+    if (g.segment === "dot") st = h("p", "statut non", "Invité à la dot seulement : pas prévu au mariage");
+    else if (g.absent_jj) st = h("p", "statut non", "A répondu qu'il ne viendrait pas");
+    else if (!g.repondu_jj) st = h("p", "statut warn", "N'a pas répondu : jusqu'à " + g.places + (g.places > 1 ? " personnes" : " personne"));
+    else st = h("p", "statut ok", g.n_oui + (g.n_oui > 1 ? " personnes attendues" : " personne attendue"));
+    c.appendChild(st);
+    var pers = g.personnes || [], groupe = pers.length > 1;
+    var tablesIds = [], tablesNoms = [];
+    pers.forEach(function (p) { if (p.table_id && tablesIds.indexOf(p.table_id) === -1) { tablesIds.push(p.table_id); tablesNoms.push(p.table_nom); } });
+    if (!pers.length && g.table_id) { tablesIds.push(g.table_id); tablesNoms.push(g.table_nom); }
+    var t = h("div", "table-gros" + (tablesNoms.length ? "" : " sans"));
+    t.appendChild(h("span", null, tablesNoms.length > 1 ? "Tables" : "Table"));
+    t.appendChild(h("strong", null, tablesNoms.length ? tablesNoms.join(" et ") : "Pas encore attribuée"));
+    c.appendChild(t);
+    if (groupe) {
+      var ul = h("ul", "groupe-liste");
+      pers.forEach(function (p) {
+        var li = h("li", null, p.nom);
+        li.appendChild(h("span", "sous", (p.reference ? p.reference + " · " : "") + (p.table_nom || "pas de table")));
+        ul.appendChild(li);
+      });
+      c.appendChild(h("p", "statut ok", "Une seule invitation pour " + g.places + " personnes : toutes entrent ensemble"));
+      c.appendChild(ul);
+    }
+    if (tablesIds.length && plan) c.appendChild(miniPlan(tablesIds));
+    var b = h("button", "btn" + (g.arrive_le ? " second" : ""), g.arrive_le ? "Arrivé à " + new Date(g.arrive_le).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) + " (annuler)" : (groupe ? "Marquer tout le groupe comme arrivé" : "Marquer comme arrivé"));
+    b.type = "button";
+    b.addEventListener("click", function () {
+      b.disabled = true;
+      rpc("accueil_marquer", { p_id: g.id, p_arrive: !g.arrive_le })
+        .then(function (val) { g.arrive_le = val; fiche(g); })
+        .catch(function (e) { b.disabled = false; gererErreur(e); });
+    });
+    c.appendChild(b);
+    f.appendChild(c);
+    f.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function chercher(q) { return rpc("accueil_chercher", { p_q: q }); }
+  function parJeton(token) {
+    return chercher(token).then(function (rows) {
+      if (!rows.length) { erreur("Invité introuvable : ce QR n'est pas valide."); return; }
+      fiche(rows[0]);
+    }).catch(gererErreur);
+  }
+
+  // ---------- recherche par référence ou nom ----------
+  $("recherche").addEventListener("input", function () {
+    clearTimeout(recT);
+    var q = $("recherche").value.trim();
+    recT = setTimeout(function () {
+      var ul = $("resultats"); ul.innerHTML = "";
+      if (q.length < 2) return;
+      chercher(q).then(function (rows) {
+        if (!rows.length) { ul.appendChild(h("li", "aide", "Aucun résultat.")); return; }
+        rows.forEach(function (g) {
+          var li = h("li"), b = h("button"); b.type = "button";
+          b.textContent = g.prenom;
+          b.appendChild(h("span", "sous", (g.reference ? g.reference + " · " : "") + (g.table_nom || "Table non attribuée")));
+          b.addEventListener("click", function () { fiche(g); ul.innerHTML = ""; $("recherche").value = ""; });
+          li.appendChild(b); ul.appendChild(li);
+        });
+      }).catch(gererErreur);
+    }, 250);
+  });
+
+  // ---------- scanner ----------
+  function arreter() {
+    clearInterval(scanTimer); scanTimer = null;
+    if (flux) { flux.getTracks().forEach(function (t) { t.stop(); }); flux = null; }
+    $("video").hidden = true; $("scanner").textContent = "Scanner un QR";
+  }
+  $("scanner").addEventListener("click", function () {
+    if (flux) { arreter(); return; }
+    var aide = $("aide-scan"); aide.hidden = true;
+    if (!("BarcodeDetector" in window) || !navigator.mediaDevices) {
+      aide.textContent = "Ce navigateur ne lit pas les QR ici. Utilisez l'appareil photo du téléphone : il ouvre cette page directement. Sinon, cherchez la référence ou le nom ci-dessous.";
+      aide.hidden = false; return;
+    }
+    var det = new BarcodeDetector({ formats: ["qr_code"] });
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function (s) {
+      flux = s; var v = $("video"); v.srcObject = s; v.hidden = false; v.play();
+      $("scanner").textContent = "Arrêter le scan";
+      scanTimer = setInterval(function () {
+        det.detect(v).then(function (codes) {
+          if (!codes.length) return;
+          var m = String(codes[0].rawValue).match(/\/a\/([A-Za-z0-9]+)/);
+          if (m) { arreter(); parJeton(m[1]); }
+        }).catch(function () {});
+      }, 300);
+    }).catch(function () { aide.textContent = "La caméra n'est pas accessible. Autorisez-la, ou cherchez la référence ou le nom ci-dessous."; aide.hidden = false; });
+  });
+
+  // ---------- connexion ----------
+  function vue(n) { $("connexion").hidden = n !== "connexion"; $("app").hidden = n !== "app"; }
+  function entrer() {
+    vue("app");
+    rpc("accueil_plan", {}).then(function (p) { plan = p; }).catch(function () {});
+    var m = location.pathname.match(/\/a\/([A-Za-z0-9]+)/);
+    var t = m ? m[1] : new URLSearchParams(location.search).get("t");
+    if (t) return new Promise(function (ok) { setTimeout(ok, 400); }).then(function () { return parJeton(t); });
+  }
+  function sortir() { arreter(); session = null; var s = lire(); delete s.refresh; ecrire(s); vue("connexion"); }
+
+  $("form-connexion").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var btn = $("btn-connexion"), err = $("err-connexion"); err.hidden = true; btn.disabled = true; btn.textContent = "Connexion…";
+    auth("password", { email: $("email").value.trim(), password: $("mdp").value })
+      .then(entrer).then(function () { $("mdp").value = ""; })
+      .catch(function () { err.textContent = "Connexion refusée. Vérifiez l'adresse et le mot de passe."; err.hidden = false; })
+      .then(function () { btn.disabled = false; btn.textContent = "Se connecter"; });
+  });
+  $("deconnexion").addEventListener("click", function () { if (confirm("Se déconnecter de cet appareil ? Il faudra retaper l'adresse et le mot de passe.")) sortir(); });
+
+  // Reconnexion automatique avec le jeton conservé sur le téléphone ; sans réseau, on ne déconnecte jamais
+  var s0 = lire();
+  if (s0.refresh) auth("refresh_token", { refresh_token: s0.refresh }).then(entrer).catch(function (e) {
+    if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE();
+  }); else vue("connexion");
+})();
+</script>
+</body>
+</html>

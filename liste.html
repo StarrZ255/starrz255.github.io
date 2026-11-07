@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Liste d'accueil</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0a1a30; --card:#0f2742; --text:#f4efe6; --muted:#a9bdd8; --ciel:#cfe2f7; --bebe:#b4d0ee; --or:#c9a227; --line:rgba(180,208,238,.22); --error:#ff9b9b; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    [hidden] { display: none !important; }
+    main { max-width: 900px; margin: 0 auto; padding: 0 16px 60px; }
+    h1 { font-size: 24px; margin: 0; color: var(--or); }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 0 12px; }
+    .barre { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    button, .btn { font: inherit; min-height: 44px; padding: 6px 16px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--bebe); cursor: pointer; }
+    button[aria-pressed=true], button.principal { background: var(--ciel); color: var(--bg); border-color: var(--ciel); font-weight: 600; }
+    .texte-lien { border: 0; text-decoration: underline; text-underline-offset: 3px; min-height: 44px; }
+    input { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-height: 44px; width: 100%; margin: 6px 0 14px; }
+    #connexion { max-width: 420px; margin: 24px auto; padding: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+    .erreur { color: var(--error); font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
+    td.ref { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    td.tab { font-weight: 700; white-space: nowrap; }
+    .groupe td { background: rgba(207,226,247,.1); font-weight: 700; color: var(--ciel); }
+    .abs { color: var(--muted); text-decoration: line-through; }
+    .aide { color: var(--muted); font-size: 14px; }
+    .filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 12px; align-items: end; margin: 0 0 14px; }
+    .filtres label { display: block; color: var(--muted); font-size: 13px; }
+    .filtres select { display: block; width: 100%; min-height: 44px; margin-top: 4px; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+    .filtres select.actif { border-color: var(--ciel); background: rgba(207,226,247,.13); }
+    .sans-num { color: #ffcf7a; }
+    .modif { min-height: 36px; padding: 2px 12px; font-size: 14px; }
+    .oui-appel { color: #8fd6a4; }
+    #dlg { background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 20px; width: min(420px, calc(100% - 32px)); }
+    #dlg::backdrop { background: rgba(0,0,0,.55); }
+    #dlg h2 { margin: 0 0 12px; font-size: 20px; color: var(--or); }
+    #dlg label.champ { display: block; color: var(--muted); font-size: 14px; }
+    #dlg label.case { display: flex; align-items: center; gap: 10px; min-height: 40px; margin-bottom: 8px; color: var(--text); }
+    #dlg label.case input { width: 20px; height: 20px; margin: 0; }
+    #dlg .pied { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+    @media print {
+      .noprint { display: none !important; }
+      :root { color-scheme: light; --bg:#fff; --text:#000; --muted:#444; --line:#bbb; --or:#000; --ciel:#000; }
+      body { background: #fff; color: #000; font-size: 11pt; }
+      .topbar button, .barre, .aide.noprint, #connexion { display: none !important; }
+      h1 { color: #000; }
+      th, td { padding: 3px 6px; border-bottom: 1px solid #bbb; }
+      .groupe td { background: #eee; color: #000; }
+      tr { break-inside: avoid; }
+      thead { display: table-header-group; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topbar"><h1 id="titre">Liste d'accueil</h1><button type="button" class="texte-lien" id="deconnexion" hidden>Se déconnecter</button></div>
+
+  <section id="connexion" hidden>
+    <p class="aide">Réservé aux mariés.</p>
+    <form id="form-connexion">
+      <label>Adresse e-mail<input type="email" id="email" autocomplete="username" required></label>
+      <label>Mot de passe<input type="password" id="mdp" autocomplete="current-password" required></label>
+      <button type="submit" class="principal" id="btn-connexion" style="width:100%">Se connecter</button>
+      <p class="erreur" id="err-connexion" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <div class="barre">
+      <button type="button" data-tri="reference" aria-pressed="true">Par référence</button>
+      <button type="button" data-tri="table" aria-pressed="false">Par table</button>
+      <button type="button" class="principal" id="imprimer">Imprimer</button>
+    </div>
+    <p class="aide noprint">Plan B si le QR ne se lit pas : l'accueil cherche la référence dans cette liste et voit la table. À imprimer une fois le plan de salle terminé : la liste reflète le plan au moment où vous ouvrez la page.</p>
+    <input type="search" id="recherche" class="noprint" placeholder="Rechercher un nom, une référence ou une table" aria-label="Rechercher un nom, une référence ou une table" autocomplete="off" style="margin:0 0 12px">
+    <p class="aide noprint">Touchez « Modifier » pour corriger un nom, le nombre de places ou le numéro. Le suivi des appels se fait ici aussi.</p>
+    <div class="filtres noprint" id="filtres">
+      <label>Invités à
+        <select data-f="grp"><option value="mariage">Le mariage</option><option value="dot">La dot seule</option><option value="tous">Tous</option></select></label>
+      <label>Numéro WhatsApp
+        <select data-f="tel"><option value="tous">Tous</option><option value="sans">Sans numéro</option><option value="avec">Avec numéro</option></select></label>
+      <label>Appel
+        <select data-f="appel"><option value="tous">Tous</option><option value="non">À appeler</option><option value="oui">Déjà appelés</option></select></label>
+      <label>Invités de
+        <select data-f="cote"><option value="tous">Les deux côtés</option><option value="marie">Le marié</option><option value="mariee">La mariée</option></select></label>
+      <label>Personnes par invitation
+        <select data-f="pers"><option value="tous">Toutes</option><option value="1">1 personne</option><option value="2">2 personnes</option><option value="3">3 personnes</option><option value="4">4 et plus</option></select></label>
+      <label>Numéro qui envoie
+        <select data-f="exp"><option value="tous">Tous</option></select></label>
+      <button type="button" id="raz">Tout afficher</button>
+    </div>
+    <p class="noprint" style="margin:0 0 12px"><button type="button" class="modif" id="lot-exp" hidden></button></p>
+    <p class="erreur" id="err-app" role="alert" hidden></p>
+    <table>
+      <thead id="entete"></thead>
+      <tbody id="corps"></tbody>
+    </table>
+  </section>
+</main>
+<dialog id="dlg"></dialog>
+
+<script src="/config.js"></script>
+<script src="/nav.js"></script>
+<script>
+(function () {
+  var C = window.MARIAGE;
+  var $ = function (id) { return document.getElementById(id); };
+  var CLE = "mariage-envoi";
+  var session = null, guests = [], affiches = [], tri = "reference", F = { grp: "mariage", tel: "tous", appel: "tous", cote: "tous", pers: "tous", exp: "tous" };
+
+  function lire() { try { return JSON.parse(localStorage.getItem(CLE) || "{}"); } catch (e) { return {}; } }
+  function ecrire(o) { try { localStorage.setItem(CLE, JSON.stringify(o)); } catch (e) {} }
+  function brut(path, opts, jeton) {
+    opts = opts || {};
+    var h = { "apikey": C.supabaseKey, "Content-Type": "application/json" };
+    if (jeton) h["Authorization"] = "Bearer " + jeton;
+    return fetch(C.supabaseUrl + path, { method: opts.method || "GET", headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  }
+  function auth(grant, corps) {
+    return brut("/auth/v1/token?grant_type=" + grant, { method: "POST", body: corps }).then(function (r) {
+      if (!r.ok) throw new Error("auth " + r.status); return r.json();
+    }).then(function (j) { session = { access: j.access_token, refresh: j.refresh_token }; var s = lire(); s.refresh = j.refresh_token; ecrire(s); });
+  }
+  function api(path, opts) {
+    opts = opts || {};
+    return brut(path, opts, session && session.access).then(function (r) {
+      if (r.status !== 401) return r;
+      if (!session || !session.refresh) throw new Error("session");
+      return auth("refresh_token", { refresh_token: session.refresh }).then(function () { return brut(path, opts, session.access); });
+    }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return opts.method === "PATCH" ? null : r.json(); });
+  }
+  function brutPatch(path, body) { return api(path, { method: "PATCH", body: body }); }
+  function normaliserTel(b) {
+    var s = (b || "").replace(/[\s.\-()]/g, "");
+    if (s.indexOf("00") === 0) s = "+" + s.slice(2);
+    if (/^\+\d{8,15}$/.test(s)) return s;
+    if (/^\d{10}$/.test(s)) return "+225" + s;
+    return null;
+  }
+  function fmt(n) { return n ? n.replace(/^\+225(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/, "$1 $2 $3 $4 $5") : ""; }
+  function dialogueExp() {
+    var hotes = [];
+    affiches.forEach(function (g) { var h = hoteDe(g); if (hotes.indexOf(h) < 0) hotes.push(h); });
+    var d = $("dlg"); d.innerHTML = "";
+    var f = document.createElement("form"); f.method = "dialog";
+    var h2 = document.createElement("h2"); h2.textContent = "Numéro qui envoie"; f.appendChild(h2);
+    var pp = document.createElement("p"); pp.textContent = "Appliqué aux " + hotes.length + " invitation" + (hotes.length > 1 ? "s" : "") + " affichée" + (hotes.length > 1 ? "s" : "") + " (les filtres en cours décident lesquelles)."; f.appendChild(pp);
+    var l = document.createElement("label"); l.className = "champ"; l.appendChild(document.createTextNode("Numéro (vide = aucun)"));
+    var i = document.createElement("input"); i.type = "tel"; i.inputMode = "tel"; i.autocomplete = "off"; l.appendChild(i); f.appendChild(l);
+    var err = document.createElement("p"); err.className = "erreur"; err.hidden = true; f.appendChild(err);
+    var pied = document.createElement("div"); pied.className = "pied";
+    var ann = document.createElement("button"); ann.type = "button"; ann.textContent = "Annuler"; ann.addEventListener("click", function () { d.close(); });
+    var ok = document.createElement("button"); ok.type = "submit"; ok.className = "principal"; ok.textContent = "Appliquer";
+    pied.appendChild(ann); pied.appendChild(ok); f.appendChild(pied);
+    f.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var n = null;
+      if (i.value.trim()) { n = normaliserTel(i.value); if (!n) { err.textContent = "Numéro non reconnu : 10 chiffres, ou +indicatif et numéro."; err.hidden = false; return; } }
+      ok.disabled = true;
+      var ids = hotes.map(function (h) { return h.id; }), suite = Promise.resolve();
+      for (var k = 0; k < ids.length; k += 80) (function (lot) {
+        suite = suite.then(function () { return brutPatch("/rest/v1/guests?id=in.(" + lot.join(",") + ")", { expediteur: n }); });
+      })(ids.slice(k, k + 80));
+      suite.then(function () { hotes.forEach(function (h) { h.expediteur = n; }); d.close(); rendre(); },
+        function () { ok.disabled = false; err.textContent = "Enregistrement impossible. Vérifiez la connexion."; err.hidden = false; charger(); });
+    });
+    d.appendChild(f); d.showModal(); i.focus();
+  }
+  function dialogue(titre, g) {
+    var d = $("dlg"); d.innerHTML = "";
+    var f = document.createElement("form"); f.method = "dialog";
+    var h2 = document.createElement("h2"); h2.textContent = titre; f.appendChild(h2);
+    function champ(label, type, val, extra) {
+      var l = document.createElement("label"); l.className = "champ"; l.appendChild(document.createTextNode(label));
+      var i = document.createElement("input"); i.type = type; i.value = val; i.autocomplete = "off";
+      if (extra) for (var k in extra) i[k] = extra[k];
+      l.appendChild(i); f.appendChild(l); return i;
+    }
+    var membre = !!g.parent_id, nbm = guests.filter(function (x) { return x.parent_id === g.id; }).length;
+    var nom = champ(membre ? "Nom de la personne" : "Nom complet", "text", g.prenom, { required: true });
+    var aff, pl, tel, exp, ap;
+    if (!membre) {
+      aff = champ("Nom affiché sur l'invitation, ex. « Famille Ahui » (facultatif)", "text", g.nom_affiche || "");
+      pl = champ("Nombre de personnes de l'invitation (1 = seul, 2 = couple…)", "number", g.places, { min: Math.max(1, nbm + 1), max: 10, required: true });
+      tel = champ("Numéro WhatsApp", "tel", g.telephone || "", { inputMode: "tel" });
+      exp = champ("Numéro qui envoie l'invitation (vide = aucun)", "tel", g.expediteur || "", { inputMode: "tel" });
+      var lab = document.createElement("label"); lab.className = "case";
+      ap = document.createElement("input"); ap.type = "checkbox"; ap.checked = !!g.appele_le;
+      lab.appendChild(ap); lab.appendChild(document.createTextNode("Déjà appelé")); f.appendChild(lab);
+    }
+    var err = document.createElement("p"); err.className = "erreur"; err.hidden = true; f.appendChild(err);
+    var pied = document.createElement("div"); pied.className = "pied";
+    var ann = document.createElement("button"); ann.type = "button"; ann.textContent = "Annuler"; ann.addEventListener("click", function () { d.close(); });
+    var ok = document.createElement("button"); ok.type = "submit"; ok.className = "principal"; ok.textContent = "Enregistrer";
+    pied.appendChild(ann); pied.appendChild(ok); f.appendChild(pied);
+    f.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var corps = { prenom: nom.value.trim() };
+      if (!corps.prenom) { err.textContent = "Le nom est obligatoire."; err.hidden = false; return; }
+      if (membre) {
+        ok.disabled = true;
+        brutPatch("/rest/v1/guests?id=eq." + g.id, corps).then(function () { g.prenom = corps.prenom; d.close(); rendre(); },
+          function () { ok.disabled = false; err.textContent = "Enregistrement impossible. Vérifiez la connexion."; err.hidden = false; });
+        return;
+      }
+      corps.places = Math.min(10, Math.max(Math.max(1, nbm + 1), +pl.value || 1));
+      corps.nom_affiche = aff.value.trim() || null;
+      if (tel.value.trim()) { var n = normaliserTel(tel.value); if (!n) { err.textContent = "Numéro non reconnu : 10 chiffres, ou +indicatif et numéro."; err.hidden = false; return; } corps.telephone = n; } else corps.telephone = null;
+      if (exp.value.trim()) { var ne = normaliserTel(exp.value); if (!ne) { err.textContent = "Numéro d'expéditeur non reconnu : 10 chiffres, ou +indicatif et numéro."; err.hidden = false; return; } corps.expediteur = ne; } else corps.expediteur = null;
+      corps.appele_le = ap.checked ? (g.appele_le || new Date().toISOString()) : null;
+      ok.disabled = true;
+      brutPatch("/rest/v1/guests?id=eq." + g.id, corps).then(function () {
+        g.prenom = corps.prenom; g.nom_affiche = corps.nom_affiche; g.places = corps.places; g.telephone = corps.telephone; g.expediteur = corps.expediteur; g.appele_le = corps.appele_le;
+        d.close(); rendre();
+      }, function () { ok.disabled = false; err.textContent = "Enregistrement impossible. Vérifiez la connexion."; err.hidden = false; });
+    });
+    d.appendChild(f); d.showModal(); nom.focus();
+  }
+  function td(cls, txt) { var e = document.createElement("td"); if (cls) e.className = cls; e.textContent = txt; return e; }
+  function absent(g) {
+    var r = g.reponses || {}, ks = ["mairie", "eglise", "reception"].filter(function (k) { return r[k]; });
+    return ks.length === 3 && ks.every(function (k) { return r[k].r === "non"; });
+  }
+  function norm(s) { return (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function parentDe(g) { return g.parent_id ? guests.filter(function (x) { return x.id === g.parent_id; })[0] : null; }
+  function hoteDe(g) { return parentDe(g) || g; }
+  function numeroDe(g) { return hoteDe(g).telephone; }
+  function appeleDe(g) { var p = parentDe(g); return (p || g).appele_le; }
+  function nomAff(g) { var p = parentDe(g); if (p) return g.prenom + " (avec " + (p.nom_affiche || p.prenom) + ")"; return g.nom_affiche ? g.nom_affiche + " (" + g.prenom + ")" : g.prenom; }
+  function parQui(g) { return g.cote === "marie" ? "Le marié" : g.cote === "mariee" ? "La mariée" : "—"; }
+  function tableNom(g) { return g.tables_salle ? g.tables_salle.nom : "—"; }
+  function numTable(g) { var m = g.tables_salle && g.tables_salle.nom.match(/\d+/); return m ? +m[0] : 9999; }
+
+  function rendre() {
+    document.querySelectorAll("[data-tri]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.tri === tri); });
+    var tete = $("entete"), corps = $("corps"); tete.innerHTML = ""; corps.innerHTML = "";
+    var tr = document.createElement("tr");
+    ["Référence", "Nom", "Pers.", "Table", "Invité par", "Numéro", "Expéditeur", "Appel", ""].forEach(function (t, k) { var th = document.createElement("th"); th.textContent = t; if (k > 4) th.className = "noprint"; tr.appendChild(th); });
+    tete.appendChild(tr);
+    var vals = [];
+    guests.forEach(function (g) { var e = hoteDe(g).expediteur; if (e && vals.indexOf(e) < 0) vals.push(e); });
+    vals.sort();
+    if (F.exp !== "tous" && F.exp !== "aucun" && vals.indexOf(F.exp) < 0) F.exp = "tous";
+    var selExp = document.querySelector('[data-f="exp"]'); selExp.innerHTML = "";
+    [["tous", "Tous les numéros"], ["aucun", "Non renseigné"]].concat(vals.map(function (v) { return [v, fmt(v)]; })).forEach(function (o) {
+      var op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; selExp.appendChild(op);
+    });
+    var q = norm($("recherche").value.trim());
+    var liste = guests.filter(function (g) {
+      var h = hoteDe(g);
+      if (F.grp === "mariage" && h.segment === "dot") return false;
+      if (F.grp === "dot" && h.segment !== "dot") return false;
+      if (F.appel !== "tous" && (F.appel === "oui") !== !!appeleDe(g)) return false;
+      if (F.tel !== "tous" && (F.tel === "avec") !== !!numeroDe(g)) return false;
+      if (F.cote !== "tous" && g.cote !== F.cote) return false;
+      if (F.exp !== "tous") { var ee = h.expediteur || ""; if (F.exp === "aucun" ? ee : ee !== F.exp) return false; }
+      if (F.pers !== "tous") { var np = h.places; if (F.pers === "4" ? np < 4 : np !== +F.pers) return false; }
+      return !q || norm(g.prenom + " " + (g.nom_affiche || "") + " " + g.reference + " " + tableNom(g)).indexOf(q) !== -1;
+    });
+    document.querySelectorAll("[data-f]").forEach(function (s) { s.value = F[s.dataset.f]; s.classList.toggle("actif", s.dataset.f === "grp" ? F.grp !== "mariage" : F[s.dataset.f] !== "tous"); });
+    affiches = liste;
+    var be = $("lot-exp");
+    be.hidden = !liste.length;
+    be.textContent = "Définir le numéro qui envoie pour les " + liste.length + " lignes affichées";
+    var rf = function (g) { return g.reference || "~" + g.prenom; };
+    if (tri === "reference") liste.sort(function (a, b) { return rf(a) < rf(b) ? -1 : 1; });
+    else liste.sort(function (a, b) { return numTable(a) - numTable(b) || (rf(a) < rf(b) ? -1 : 1); });
+    var courant = null;
+    liste.forEach(function (g) {
+      if (tri === "table" && tableNom(g) !== courant) {
+        courant = tableNom(g);
+        var gr = document.createElement("tr"); gr.className = "groupe";
+        var c = td(null, courant === "—" ? "Sans table" : courant); c.colSpan = 9; gr.appendChild(c); corps.appendChild(gr);
+      }
+      var r = document.createElement("tr");
+      r.appendChild(td("ref", g.reference || "Dot"));
+      r.appendChild(td(absent(g) || (parentDe(g) && absent(parentDe(g))) ? "abs" : null, nomAff(g)));
+      r.appendChild(td(null, String(g.places)));
+      r.appendChild(td("tab", tableNom(g)));
+      r.appendChild(td(null, parQui(g)));
+      r.appendChild(td("noprint" + (numeroDe(g) ? "" : " sans-num"), numeroDe(g) ? numeroDe(g).replace(/^\+225(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/, "$1 $2 $3 $4 $5") : "À ajouter"));
+      r.appendChild(td("noprint" + (hoteDe(g).expediteur ? "" : " sans-num"), hoteDe(g).expediteur ? fmt(hoteDe(g).expediteur) : "À définir"));
+      r.appendChild(td("noprint" + (appeleDe(g) ? " oui-appel" : ""), appeleDe(g) ? "Appelé" : "—"));
+      var cm = document.createElement("td"); cm.className = "noprint";
+      var bm = document.createElement("button"); bm.type = "button"; bm.className = "modif"; bm.textContent = "Modifier";
+      bm.setAttribute("aria-label", "Modifier " + g.prenom);
+      bm.addEventListener("click", function () { dialogue("Modifier " + g.prenom, g); });
+      cm.appendChild(bm); r.appendChild(cm);
+      corps.appendChild(r);
+    });
+    $("titre").textContent = "Liste d'accueil · " + liste.length + (liste.length > 1 ? " lignes" : " ligne") + (liste.length < guests.length ? " sur " + guests.length : "");
+  }
+
+  function vue(n) { $("connexion").hidden = n !== "connexion"; $("app").hidden = n !== "app"; $("deconnexion").hidden = n !== "app"; }
+  function charger() {
+    return api("/rest/v1/guests?select=id,parent_id,nom_affiche,reference,prenom,cote,segment,places,telephone,expediteur,appele_le,reponses,tables_salle(nom)&or=(reference.not.is.null,segment.eq.dot)&limit=1000")
+      .then(function (rows) { guests = rows; $("err-app").hidden = true; rendre(); })
+      .catch(function (e) {
+        if (e.message === "session" || /auth|http 40[13]/.test(e.message)) { sortir(); return; }
+        $("err-app").textContent = "Chargement impossible."; $("err-app").hidden = false;
+      });
+  }
+  function sortir() { session = null; var s = lire(); delete s.refresh; ecrire(s); vue("connexion"); }
+
+  document.querySelectorAll("[data-tri]").forEach(function (b) { b.addEventListener("click", function () { tri = b.dataset.tri; rendre(); }); });
+  document.querySelectorAll("[data-f]").forEach(function (s) { s.addEventListener("change", function () { F[s.dataset.f] = s.value; rendre(); }); });
+  $("raz").addEventListener("click", function () { F = { grp: "mariage", tel: "tous", appel: "tous", cote: "tous", pers: "tous", exp: "tous" }; $("recherche").value = ""; rendre(); });
+  (function () {
+    var d = $("dlg"), debutDehors = false;
+    d.addEventListener("pointerdown", function (e) { debutDehors = e.target === d; });
+    d.addEventListener("click", function (e) { if (e.target === d && debutDehors) d.close(); });
+  })();
+  $("lot-exp").addEventListener("click", dialogueExp);
+  $("recherche").addEventListener("input", rendre);
+  $("imprimer").addEventListener("click", function () { F = { grp: "mariage", tel: "tous", appel: "tous", cote: "tous", pers: "tous", exp: "tous" }; $("recherche").value = ""; rendre(); window.print(); });
+  $("deconnexion").addEventListener("click", sortir);
+  $("form-connexion").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = $("err-connexion"); err.hidden = true;
+    auth("password", { email: $("email").value.trim(), password: $("mdp").value })
+      .then(function () { vue("app"); return charger(); })
+      .catch(function () { err.textContent = "Connexion refusée."; err.hidden = false; });
+  });
+  var s0 = lire();
+  if (s0.refresh) auth("refresh_token", { refresh_token: s0.refresh }).then(function () { vue("app"); return charger(); }).catch(function (e) { if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE(); });
+  else vue("connexion");
+})();
+</script>
+</body>
+</html>

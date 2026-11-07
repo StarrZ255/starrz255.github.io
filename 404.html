@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Invitation</title>
+</head>
+<body style="background:#0a1a30;color:#f4efe6;font:18px/1.5 Georgia,serif;text-align:center;padding:18vh 24px">
+<p id="m">Chargement…</p>
+<script>
+// GitHub Pages n'a pas de redirections : /i/<code> et /a/<code> arrivent ici, on charge la bonne page à leur place.
+(function () {
+  var p = location.pathname;
+  var page = /^\/a\/[A-Za-z0-9]+/.test(p) ? "/accueil.html" : /^\/i\/[A-Za-z0-9]+/.test(p) ? "/invite.html" : null;
+  var m = document.getElementById("m");
+  if (!page) { m.textContent = "Page introuvable."; return; }
+  fetch(page).then(function (r) { return r.text(); }).then(function (h) {
+    document.open(); document.write(h); document.close();
+  }).catch(function () { m.textContent = "Connexion impossible. Vérifiez votre connexion et réessayez."; });
+})();
+</script>
+</body>
+</html>

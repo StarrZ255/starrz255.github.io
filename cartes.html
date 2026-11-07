@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1a30">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Cartes physiques</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0a1a30; --card:#0f2742; --text:#f4efe6; --muted:#a9bdd8; --ciel:#cfe2f7; --bebe:#b4d0ee; --or:#c9a227; --line:rgba(180,208,238,.22); --error:#ff9b9b; --ok:#8fd6a4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    [hidden] { display: none !important; }
+    main { max-width: 980px; margin: 0 auto; padding: 0 16px 60px; }
+    h1 { font-size: 26px; margin: 0; color: var(--or); }
+    h2 { font-size: 18px; margin: 26px 0 8px; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0 8px; }
+    .aide { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+    .erreur { color: var(--error); font-size: 14px; }
+    button, .btn { font: inherit; min-height: 44px; padding: 6px 16px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--bebe); cursor: pointer; }
+    button:hover { border-color: var(--bebe); }
+    button.principal { background: var(--ciel); color: var(--bg); border-color: var(--ciel); font-weight: 600; }
+    button:disabled { opacity: .5; cursor: default; }
+    button.petit { min-height: 36px; padding: 2px 12px; font-size: 14px; }
+    .texte-lien { border: 0; text-decoration: underline; text-underline-offset: 3px; }
+    input { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-height: 44px; width: 100%; margin: 6px 0 14px; }
+    #connexion { max-width: 420px; margin: 24px auto; padding: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+    .barre { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+    .note { padding: 10px 14px; border: 1px solid var(--or); border-radius: 10px; font-size: 14px; margin-bottom: 14px; }
+    .grille { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+    .grille li { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+    .qr { width: 150px; height: 150px; background: #fff; padding: 6px; border-radius: 6px; }
+    .qr svg { display: block; width: 100%; height: 100%; }
+    .nom { font-weight: 700; overflow-wrap: anywhere; }
+    .ref { color: var(--muted); font-size: 13px; }
+    .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .resultats { list-style: none; margin: 0; padding: 0; }
+    .resultats li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .vide { color: var(--muted); padding: 12px 0; }
+    @media print {
+      :root { color-scheme: light; }
+      body { background: #fff; color: #000; }
+      .topbar button, .barre, .note, .ajout, .acts, nav, h2.noprint { display: none !important; }
+      h1 { color: #000; }
+      .grille { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .grille li { background: #fff; border: 1px solid #999; break-inside: avoid; }
+      .ref { color: #333; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topbar"><h1>Cartes physiques</h1><button type="button" class="texte-lien" id="deconnexion" hidden>Se déconnecter</button></div>
+
+  <section id="connexion" hidden>
+    <p class="aide">Réservé aux mariés.</p>
+    <form id="form-connexion">
+      <label>Adresse e-mail<input type="email" id="email" autocomplete="username" required></label>
+      <label>Mot de passe<input type="password" id="mdp" autocomplete="current-password" required></label>
+      <button type="submit" class="principal" id="btn-connexion" style="width:100%">Se connecter</button>
+      <p class="erreur" id="err-connexion" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <p class="aide" id="bilan"></p>
+    <div class="note">Le QR de chaque carte contient le lien personnel de l'invité. Une fois imprimé, ne supprimez pas l'invité et ne changez pas son lien : la carte cesserait de fonctionner. Le site se ferme le 1er décembre.</div>
+    <div class="barre">
+      <button type="button" class="principal" id="zip">Tout télécharger (ZIP : PNG et SVG)</button>
+      <button type="button" id="csv">Exporter la liste (CSV)</button>
+      <button type="button" id="imprimer">Imprimer</button>
+    </div>
+    <p class="erreur" id="err-app" role="alert" hidden></p>
+    <ul class="grille" id="grille"></ul>
+    <p class="vide" id="vide" hidden>Aucune carte pour l'instant. Ajoutez des invités ci-dessous.</p>
+
+    <section class="ajout">
+      <h2 class="noprint">Ajouter à la liste des cartes</h2>
+      <input type="search" id="recherche" placeholder="Rechercher un nom" aria-label="Rechercher un invité à ajouter">
+      <ul class="resultats" id="resultats"></ul>
+    </section>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="/config.js"></script>
+<script src="/nav.js"></script>
+<script>
+(function () {
+  var C = window.MARIAGE;
+  var $ = function (id) { return document.getElementById(id); };
+  var CLE = "mariage-envoi";
+  var session = null, guests = [];
+
+  function lire() { try { return JSON.parse(localStorage.getItem(CLE) || "{}"); } catch (e) { return {}; } }
+  function ecrire(o) { try { localStorage.setItem(CLE, JSON.stringify(o)); } catch (e) {} }
+  function brut(path, opts, jeton) {
+    opts = opts || {};
+    var h = { "apikey": C.supabaseKey, "Content-Type": "application/json" };
+    if (jeton) h["Authorization"] = "Bearer " + jeton;
+    if (opts.prefer) h["Prefer"] = opts.prefer;
+    return fetch(C.supabaseUrl + path, { method: opts.method || "GET", headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  }
+  function auth(grant, corps) {
+    return brut("/auth/v1/token?grant_type=" + grant, { method: "POST", body: corps }).then(function (r) {
+      if (!r.ok) throw new Error("auth " + r.status); return r.json();
+    }).then(function (j) { session = { access: j.access_token, refresh: j.refresh_token }; var s = lire(); s.refresh = j.refresh_token; ecrire(s); });
+  }
+  function api(path, opts) {
+    return brut(path, opts, session && session.access).then(function (r) {
+      if (r.status !== 401) return r;
+      if (!session || !session.refresh) throw new Error("session");
+      return auth("refresh_token", { refresh_token: session.refresh }).then(function () { return brut(path, opts, session.access); });
+    }).then(function (r) {
+      if (!r.ok) throw new Error("http " + r.status);
+      return r.status === 204 || (opts && opts.prefer === "return=minimal") ? null : r.json();
+    });
+  }
+
+  function norm(s) { return (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function lien(g) { return (C.siteUrl || location.origin).replace(/\/$/, "") + "/i/" + g.token; }
+  function fichier(g) { return ((g.reference || "dot") + "-" + norm(g.prenom).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")); }
+  function erreur(t) { $("err-app").textContent = t || ""; $("err-app").hidden = !t; }
+  function cartes() { return guests.filter(function (g) { return g.carte; }); }
+
+  function qr(g) { var q = qrcode(0, "Q"); q.addData(lien(g)); q.make(); return q; }
+  function svgDe(g) { return qr(g).createSvgTag({ cellSize: 10, margin: 4, scalable: true }); }
+  function pngDe(g) {
+    var q = qr(g), n = q.getModuleCount(), marge = 4, total = n + 2 * marge, cell = Math.ceil(1000 / total);
+    var c = document.createElement("canvas"); c.width = c.height = total * cell;
+    var x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.fillStyle = "#000";
+    for (var r = 0; r < n; r++) for (var k = 0; k < n; k++) if (q.isDark(r, k)) x.fillRect((k + marge) * cell, (r + marge) * cell, cell, cell);
+    return new Promise(function (ok) { c.toBlob(ok, "image/png"); });
+  }
+  function telecharger(blob, nom) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nom;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  function rendre() {
+    var liste = cartes().sort(function (a, b) { return (a.reference || "~") < (b.reference || "~") ? -1 : 1; });
+    $("bilan").textContent = liste.length + " carte" + (liste.length > 1 ? "s" : "") + " physique" + (liste.length > 1 ? "s" : "");
+    var ul = $("grille"); ul.innerHTML = "";
+    liste.forEach(function (g) {
+      var li = document.createElement("li");
+      var box = document.createElement("div"); box.className = "qr"; box.innerHTML = svgDe(g); li.appendChild(box);
+      var n = document.createElement("div"); n.className = "nom"; n.textContent = g.prenom; li.appendChild(n);
+      var r = document.createElement("div"); r.className = "ref"; r.textContent = (g.reference || "Dot seule") + (g.places > 1 ? " · " + g.places + " personnes" : ""); li.appendChild(r);
+      var acts = document.createElement("div"); acts.className = "acts";
+      var b1 = document.createElement("button"); b1.type = "button"; b1.className = "petit"; b1.textContent = "PNG";
+      b1.addEventListener("click", function () { pngDe(g).then(function (b) { telecharger(b, fichier(g) + ".png"); }); });
+      var b2 = document.createElement("button"); b2.type = "button"; b2.className = "petit"; b2.textContent = "Retirer";
+      b2.addEventListener("click", function () { basculer(g, false); });
+      acts.appendChild(b1); acts.appendChild(b2); li.appendChild(acts);
+      ul.appendChild(li);
+    });
+    $("vide").hidden = liste.length > 0;
+    ["zip", "csv", "imprimer"].forEach(function (id) { $(id).disabled = !liste.length; });
+    resultats();
+  }
+
+  function resultats() {
+    var q = norm($("recherche").value.trim()), ul = $("resultats"); ul.innerHTML = "";
+    if (!q) return;
+    guests.filter(function (g) { return !g.carte && norm(g.prenom).indexOf(q) !== -1; }).slice(0, 12).forEach(function (g) {
+      var li = document.createElement("li");
+      var s = document.createElement("span"); s.textContent = g.prenom + (g.reference ? " · " + g.reference : ""); li.appendChild(s);
+      var b = document.createElement("button"); b.type = "button"; b.className = "petit"; b.textContent = "Ajouter";
+      b.addEventListener("click", function () { basculer(g, true); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    if (!ul.children.length) { var v = document.createElement("li"); v.className = "vide"; v.textContent = "Aucun nom ne correspond."; ul.appendChild(v); }
+  }
+
+  function basculer(g, v) {
+    var avant = g.carte; g.carte = v; rendre(); erreur("");
+    api("/rest/v1/guests?id=eq." + g.id, { method: "PATCH", prefer: "return=minimal", body: { carte: v } })
+      .catch(function () { g.carte = avant; rendre(); erreur("Le changement n'a pas pu être enregistré. Vérifiez votre connexion."); });
+  }
+
+  $("recherche").addEventListener("input", resultats);
+  $("imprimer").addEventListener("click", function () { window.print(); });
+
+  $("csv").addEventListener("click", function () {
+    var lignes = [["Nom", "Référence", "Personnes", "Lien du QR"]].concat(cartes().sort(function (a, b) { return (a.reference || "~") < (b.reference || "~") ? -1 : 1; })
+      .map(function (g) { return [g.prenom, g.reference || "", g.places, lien(g)]; }));
+    var csv = "﻿" + lignes.map(function (l) { return l.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(";"); }).join("\r\n");
+    telecharger(new Blob([csv], { type: "text/csv;charset=utf-8" }), "cartes-qr.csv");
+  });
+
+  $("zip").addEventListener("click", function () {
+    if (typeof JSZip !== "function") { erreur("Le module d'export n'a pas pu se charger. Vérifiez votre connexion puis rechargez la page."); return; }
+    var b = $("zip"); b.disabled = true; b.textContent = "Préparation…"; erreur("");
+    var zip = new JSZip(), liste = cartes();
+    Promise.all(liste.map(function (g) {
+      return pngDe(g).then(function (blob) { zip.file(fichier(g) + ".png", blob); zip.file(fichier(g) + ".svg", svgDe(g)); });
+    })).then(function () { return zip.generateAsync({ type: "blob" }); })
+      .then(function (blob) { telecharger(blob, "cartes-qr.zip"); })
+      .catch(function () { erreur("L'export n'a pas pu être créé."); })
+      .then(function () { b.disabled = false; b.textContent = "Tout télécharger (ZIP : PNG et SVG)"; });
+  });
+
+  function vue(n) { $("connexion").hidden = n !== "connexion"; $("app").hidden = n !== "app"; $("deconnexion").hidden = n !== "app"; }
+  function charger() {
+    return api("/rest/v1/guests?select=id,prenom,places,token,reference,segment,carte&order=prenom.asc&limit=1000")
+      .then(function (rows) { guests = rows; erreur(""); rendre(); })
+      .catch(function (e) {
+        if (e.message === "session" || /auth|http 40[13]/.test(e.message)) { sortir(); return; }
+        erreur("Chargement impossible. Vérifiez votre connexion.");
+      });
+  }
+  function sortir() { session = null; var s = lire(); delete s.refresh; ecrire(s); vue("connexion"); }
+
+  $("deconnexion").addEventListener("click", sortir);
+  $("form-connexion").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = $("err-connexion"); err.hidden = true;
+    auth("password", { email: $("email").value.trim(), password: $("mdp").value })
+      .then(function () { vue("app"); return charger(); })
+      .then(function () { $("mdp").value = ""; })
+      .catch(function () { err.textContent = "Connexion refusée."; err.hidden = false; });
+  });
+  var s0 = lire();
+  if (s0.refresh) auth("refresh_token", { refresh_token: s0.refresh }).then(function () { vue("app"); return charger(); }).catch(function (e) { if (e && /^auth 4/.test(e.message)) sortir(); else window.MARIAGE_HORS_LIGNE(); });
+  else vue("connexion");
+})();
+</script>
+</body>
+</html>
